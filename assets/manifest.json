@@ -1,0 +1,7 @@
+{
+  "ship": {
+    "sprite": "ship1.png",
+    "width": 72,
+    "height": 109
+  }
+}

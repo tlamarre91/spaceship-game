@@ -1,0 +1,60 @@
+{"frames": {
+
+"hexagon-dark-outline":
+{
+	"frame": {"x":0,"y":0,"w":169,"h":197},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":169,"h":197},
+	"sourceSize": {"w":169,"h":197}
+},
+"hexagon-dark":
+{
+	"frame": {"x":169,"y":0,"w":169,"h":197},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":169,"h":197},
+	"sourceSize": {"w":169,"h":197}
+},
+"hexagon-light-outline":
+{
+	"frame": {"x":338,"y":0,"w":169,"h":197},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":169,"h":197},
+	"sourceSize": {"w":169,"h":197}
+},
+"hexagon-light":
+{
+	"frame": {"x":507,"y":0,"w":169,"h":197},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":169,"h":197},
+	"sourceSize": {"w":169,"h":197}
+},
+"hexagon-outline":
+{
+	"frame": {"x":676,"y":0,"w":169,"h":197},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":169,"h":197},
+	"sourceSize": {"w":169,"h":197}
+},
+"hexagon":
+{
+	"frame": {"x":845,"y":0,"w":169,"h":197},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":169,"h":197},
+	"sourceSize": {"w":169,"h":197}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "hexagons.png",
+	"format": "RGBA8888",
+	"size": {"w":1014,"h":197},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:ee87bb94b7d21bb7646354ab11fc0aa9:15db152afca4c5cf7904bf9e4cfea92e:37df8bbdbe53e6edf94819d84f0f10f8$"
+}
+}

@@ -6,7 +6,7 @@
   "scripts": {
     "prestart": "gulp",
     "server": "node --enable-source-maps .",
-    "dev": "npx nodemon --enable-source-maps",
+    "dev": "nodemon --enable-source-maps",
     "debug": "node --enable-source-maps --inspect .",
     "test": "jest"
   },

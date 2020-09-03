@@ -1,6 +1,5 @@
 node_modules/
 dist/
-assets/
 logs/
 .env
 *.code-workspace
