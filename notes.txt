@@ -1,0 +1,13 @@
+- need server to have canonical state
+- each client will have a subset of the canonical state
+  and run its own simulation. on every turn, the client will
+  have to reconcile its state with what the server gave it.
+- each client will submit action queues which will be managed by the server
+  - remember, a team's action queue is the union of the queues of its players
+- i'm acting like EVERYTHING will happen in ticks, but player interaction is
+  continuous, so i still need to send stuff between clients as soon as possible.
+  it's just that latency doesn't matter hugely.
+- malicious clients may spam or abuse the server. need to mitigate that
+  - on spam detection, boot client immediately
+- GameServer will need to handle multiple GameStates.
+  - will need a "switchboard" for routing messages from client to appropriate GameState

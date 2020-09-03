@@ -1,0 +1,8 @@
+node_modules/
+dist/
+assets/
+logs/
+.env
+*.code-workspace
+*.log
+webpack-stats.json

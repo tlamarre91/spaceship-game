@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "baseUrl": "src",
+    "esModuleInterop": true,
+    "jsx": "react",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "outDir": "dist",
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "target": "es6",
+    "paths": {
+      "*": [
+        "node_modules/*"
+      ],
+      "~shared/*": [ "shared/*" ],
+      "~server/*": [ "server/*" ],
+      "~client/*": [ "client/*" ]
+    }
+  },
+  "exclude": [
+    "**/__tests__", "**/*.test.ts"
+  ]
+}
