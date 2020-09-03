@@ -62,6 +62,31 @@ export class HexVector {
     }
   }
 
+  /**
+   * get HexVector from cartesian coordinates (i.e. pixel
+   * coordinates when scaled appropriately)
+   */
+  static fromCartesianCoordinates(x: number, y: number, scale: number = 1): HexVector {
+    const q = (Math.sqrt(3) / 3 * x - (1 / 3) * y) / scale;
+    const r = ((2 / 3) * y) / scale;
+    return HexVector.fromAxialCoordinates(q, r);
+  }
+
+  /**
+   * Make a new hex-space vector from cubic coordinates, where z = -x - y
+   */
+  static fromCubicCoordinates(x: number, y: number, z: number): HexVector {
+    return new HexVector("c", x, y, z);
+  }
+
+  /**
+   * Make a new hex-space vector from a pair of coordinates, where x is
+   * horizontal position, y is diagonal position
+   */
+  static fromAxialCoordinates(x: number, y: number): HexVector {
+    return new HexVector("a", x, y);
+  }
+
   static copy(v: HexVector): HexVector {
     return new HexVector(v.system, v.x, v.y, v.z);
   }
@@ -114,30 +139,6 @@ export class HexVector {
     return result;
   }
 
-  /**
-   * get HexVector from cartesian coordinates (i.e. pixel coordinates when scaled appropriately)
-   */
-  static fromCartesianCoordinates(x: number, y: number, scale: number = 1): HexVector {
-    const q = (Math.sqrt(3) / 3 * x - (1 / 3) * y) / scale;
-    const r = ((2 / 3) * y) / scale;
-    return HexVector.fromAxialCoordinates(q, r);
-  }
-
-  /**
-   * Make a new hex-space vector from cubic coordinates, where z = -x - y
-   */
-  static fromCubicCoordinates(x: number, y: number, z: number): HexVector {
-    return new HexVector("c", x, y, z);
-  }
-
-  /**
-   * Make a new hex-space vector from a pair of coordinates, where x is
-   * horizontal position, y is vertical position
-   */
-  static fromAxialCoordinates(x: number, y: number): HexVector {
-    return new HexVector("a", x, y);
-  }
-
   toString(): string {
     if (this.system == "c") {
       return `HexVector(c, ${this.x}, ${this.y}, ${this.z})`;
@@ -147,7 +148,8 @@ export class HexVector {
   }
 
   /**
-   * get cartesian coordinates of this vector (i.e. pixel coordinates when scaled appropriately)
+   * Get cartesian coordinates of this vector (i.e. pixel
+   * coordinates when scaled appropriately)
    */
   toCartesian(scale: number = 1): [number, number] {
     const v = this.toAxial();
@@ -240,7 +242,7 @@ export class HexVector {
   }
 
   /**
-   * round this vector to the center of a hexagon on the unit hex grid
+   * Round this vector to the center of a hexagon on the unit hex lattice
    */
   cubicRound(): HexVector {
     const { x, y, z } = this.toCubic();
@@ -258,7 +260,7 @@ export class HexVector {
   }
 
   /**
-   * return linear interpolation of two HexVectors, where 0 <= t <= 1 returns
+   * Return linear interpolation of two HexVectors, where 0 <= t <= 1 returns
    * a vector on the line segment from this to v
    */
   cubicLerp(v: HexVector, t: number): HexVector {
@@ -273,16 +275,14 @@ export class HexVector {
 
   pathTo(v: HexVector, includeStart?: boolean, includeEnd?: boolean): HexVector[] {
     const path: HexVector[] = [];
-    // round this vector to a grid, then offset by a tiny vector to make path lie inside
-    // hexagons as opposed to on hex edges, which can cause nondeterministic output
+    // round this vector to lattice, then offset by a tiny vector to make path lie inside
+    // hexagons as opposed to on hex edges, which can cause funky output
     const u = this.cubicRound().plus(HexVector.EPSILON_CUBIC);
-    const d = this.gridDistance(v);
-    for (
-      let i = includeStart ? 1: 0;
-      i < d - (includeEnd ? 1 : 0);
-      i += 1
-    ) {
-      path.push(u.cubicLerp(v, i / d).cubicRound());
+    const length = this.gridDistance(v);
+    const start = includeStart ? 1 : 0;
+    const end = length - (includeEnd ? 1 : 0);
+    for (let i = start; i < end; i += 1) {
+      path.push(u.cubicLerp(v, i / length).cubicRound());
     }
 
     return path;
@@ -290,7 +290,7 @@ export class HexVector {
 
   gridWithinRange(range: number): HexVector[] {
     if (range <= 0) {
-      throw new Error("cannot pass negative range");
+      throw new Error("gridWithinRange cannot handle negative range");
     }
 
     const results: HexVector[] = [];

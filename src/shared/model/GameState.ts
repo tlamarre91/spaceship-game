@@ -310,7 +310,7 @@ export class GameState {
     if (this.entitiesById.get(entity.id)) {
       // TODO: more graceful handling of this situation, which currently is known
       // to happen on game join: the initial state includes the player's new ship,
-      // which is also included in the turn's EntitySpawned event 
+      // which is also included in the turn's events as an EntitySpawned
       log.warn(`processEntitySpawned: entity ${idtrim(entity.id)} already exists - skipping`);
       return;
     }
@@ -331,14 +331,21 @@ export class GameState {
     this.entities.forEach((e) => {
       if (hasVelocity(e) && hasPosition(e)) {
         const deltaP: HexVector = deltaTime == 1 ? e.velocity : e.velocity.times(deltaTime);
-        //if (! deltaP.equals(HexVector.ZERO)) {
+        if (! deltaP.equals(HexVector.ZERO)) {
           e.position = e.position.plus(deltaP);
           const ev = new event.EntityMoved(e.id, e.position);
           this.eventQueue.push(ev);
           this.listeners?.onEntityMoved?.(e);
-        //}
+        }
       }
     });
+  }
+
+  /**
+   * Check each entity's path during the last simulation step and see if any
+   * paths overlap. If they do... do something
+   */
+  private detectCollisions() {
   }
 
   passTurn() {

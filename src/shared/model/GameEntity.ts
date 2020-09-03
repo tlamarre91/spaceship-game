@@ -68,10 +68,12 @@ export interface PlayerControlledEntity extends GameEntity {
 
 export interface PositionEntity extends GameEntity {
   position: HexVector;
+  previousPosition: HexVector;
+  setPosition(position: HexVector): void;
 }
 
 export function hasPosition(entity: GameEntity): entity is PositionEntity {
-  return "position" in entity;
+  return "position" in entity && "previousPosition" in entity;
 }
 
 export interface RotationEntity extends GameEntity {

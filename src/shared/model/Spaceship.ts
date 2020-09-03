@@ -39,6 +39,7 @@ export class Spaceship implements
   teamId: string;
   shipType: string;
   position: HexVector;
+  previousPosition: HexVector;
   rotation: number;
   currentHitPoints: number;
   maxHitPoints: number;
@@ -57,6 +58,11 @@ export class Spaceship implements
     this.rotation = params.rotation ?? 0;
     this.currentHitPoints = params.currentHitPoints ?? Spaceship.DEFAULT_HP;
     this.maxHitPoints = params.maxHitPoints ?? Spaceship.DEFAULT_HP;
+  }
+
+  setPosition(position: HexVector) {
+    this.previousPosition = this.position;
+    this.position = position;
   }
 
   getClientIds() {

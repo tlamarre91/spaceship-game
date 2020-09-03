@@ -30,6 +30,7 @@ export class Projectile implements
   readonly spriteScale: number;
   teamId: string;
   position: HexVector;
+  previousPosition: HexVector;
   rotation: number;
   velocity: HexVector;
   currentHitPoints: number;
@@ -49,6 +50,11 @@ export class Projectile implements
     this.currentHitPoints = params.currentHitPoints ?? this.maxHitPoints;
     this.damage = params.damage ?? 1;
     this.createdBy = params.createdBy;
+  }
+
+  setPosition(position: HexVector) {
+    this.previousPosition = this.position;
+    this.position = position;
   }
 
   accelerate(v: HexVector): HexVector {
