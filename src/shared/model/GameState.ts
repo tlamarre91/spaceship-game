@@ -49,46 +49,66 @@ export interface GameStateListeners {
   onTurnEnd?: (events?: event.GameEvent[]) => void;
 }
 
+/**
+ * A representation of the full state of the game, including all entities,
+ * accessible by their IDs or (TODO) position.
+ *
+ * Behavior depends on `canonical` property: canonical GameState should run on
+ * the server, and be responsible for handling GameActions provided by player
+ * input and simulating the behavior of GameEntities, all of which results in a
+ * set of GameEvents, which the server should pass to each client.
+ *
+ * Non-canonical GameState runs on each client and updates based on GameEvents
+ * sent by the server.
+ */
 export class GameState {
-  /**
-   * isCanonical: is this the canonical game instance, or a client instance?
-   */
-  readonly isCanonical: boolean;
-  //entities: GameEntity[];
   //readonly gameId: string;
-  //private entitiesById: Map<string, GameEntity>;
-  //private clientIdSpaceships: Map<string, Spaceship>;
-  //private spaceshipClientIds: Map<string, string[]>;
-  //private actionQueueManager: ActionQueueManager;
-  //private eventQueue: event.GameEvent[];
-  //private turnCollisionPairs: [GameEntity, GameEntity][];
-  //actionHistory: action.GameAction[][];
-  //eventHistory: event.GameEvent[][];
-  //listeners: GameStateListeners;
+  /**
+   * Is this the canonical game instance, or a client instance?
+   */
+  readonly canonical: boolean;
+
+  /**
+   * Should this GameState be tracking debug information?
+   */
+  readonly debug: boolean;
+
+  /**
+   * All entities that currently exist in this GameState
+   */
   entities: GameEntity[] = [];
-  readonly gameId: string;
+
+  /**
+   * All entities, mapped by their ID property
+   */
   private entitiesById: Map<string, GameEntity> = new Map();
+
+  /**
+   * Map from client ID to the spaceship it has a part in controlling
+   */
   private clientIdSpaceships: Map<string, Spaceship> = new Map();
+
+  /**
+   * A map from each Spaceship's ID to the set of IDs of clients that
+   * have a part in controlling it
+   */
   private spaceshipClientIds: Map<string, string[]> = new Map();
+
   private actionQueueManager: ActionQueueManager = new ActionQueueManager();
   private eventQueue: event.GameEvent[] = [];
   private turnCollisionPairs: [GameEntity, GameEntity][] = [];
+
+  /**
+   * List of items comprising a current debugging view of the GameState
+   */
+  //public debugItems: VisualDebugItem[];
   actionHistory: action.GameAction[][] = [];
   eventHistory: event.GameEvent[][] = [];
   listeners: GameStateListeners = {};
 
-  constructor(isCanonical: boolean = false) {
-    this.isCanonical = isCanonical;
-    //this.entities = [];
-    //this.gameId = uuid();
-    //this.entitiesById = new Map();
-    //this.clientIdSpaceships = new Map();
-    //this.spaceshipClientIds = new Map();
-    //this.actionQueueManager = new ActionQueueManager();
-    //this.eventQueue = [];
-    //this.actionHistory = [[]];
-    //this.eventHistory = [[]];
-    //this.listeners = {};
+  constructor(canonical: boolean = false, debug: boolean = false) {
+    this.canonical = canonical;
+    this.debug = debug;
   }
 
   /**
@@ -123,7 +143,7 @@ export class GameState {
       throw new Error(`entity id ${idtrim(entity.id)} already in use`);
     }
 
-    if (this.isCanonical) {
+    if (this.canonical) {
       try {
         const ev = new event.EntitySpawned(entity.copyData());
         this.eventQueue.push(ev);
@@ -203,7 +223,7 @@ export class GameState {
   }
 
   setEventQueue(events: event.GameEvent[]) {
-    if (this.isCanonical) {
+    if (this.canonical) {
       log.warn("why are we calling setEventQueue on the canonical GameState?");
     }
 
@@ -263,7 +283,7 @@ export class GameState {
    * from processing GameActions and stepping the simulation forward.
    */
   private processEventQueue() {
-    if (this.isCanonical) {
+    if (this.canonical) {
       log.warn("canonical GameState should not be processing events");
     }
 
@@ -322,9 +342,11 @@ export class GameState {
     const entity = GameEntityFromData(entityData as GameEntity);
 
     if (this.entitiesById.get(entity.id)) {
-      // TODO: more graceful handling of this situation, which currently is known
-      // to happen on game join: the initial state includes the player's new ship,
-      // which is also included in the turn's events as an EntitySpawned
+      /** TODO: more graceful handling of this situation, which currently is
+       * known to happen on game join: the initial state includes the player's
+       * new ship, which is also included in the turn's events as an
+       * EntitySpawned
+       */
       log.warn(`processEntitySpawned: entity ${idtrim(entity.id)} already exists - skipping`);
       return;
     }
@@ -342,21 +364,18 @@ export class GameState {
 
   private simulate(deltaTime: number = 1) {
     this.entities.forEach((e) => {
-      log.info(`simulating entity ${idtrim(e.id)}`);
       if (hasVelocity(e) && hasPosition(e)) {
         const deltaP: HexVector = deltaTime == 1 ? e.velocity : e.velocity.times(deltaTime);
         if (! deltaP.equals(HexVector.ZERO)) {
-          e.position = e.position.plus(deltaP);
-          //e.movedThisTurn = true;
+          // TODO: do we really want things that moved less than one unit to be considered "moved"?
+          e.setPosition(e.position.plus(deltaP));
+          e.movedThisTurn = true;
           const ev = new event.EntityMoved(e.id, e.position);
           this.eventQueue.push(ev);
           this.listeners?.onEntityMoved?.(e);
         } else {
-          log.info("thing didn't move");
-          //e.movedThisTurn = false;
+          e.movedThisTurn = false;
         }
-      } else {
-        log.info(`${idtrim(e.id)} ain't got no position`);
       }
     });
   }
@@ -366,19 +385,49 @@ export class GameState {
    * of them collided. If they did... do something!
    *
    * @remarks
-   * Should only be called on canonical GameState
+   * Should only be called on canonical GameState.
+   * TODO: Has LOTS of room for optimization.
    */
   private detectCollisions() {
-    this.entities.forEach((e, i) => {
-      if (hasPosition(e) && hasVelocity(e)) {
-        // TODO: WRONG! first detect if entity moved this turn.
-        const path = new HexSegment(e.previousPosition, e.position);
+    this.entities.forEach((checkingEntity, i) => {
+      if (hasPosition(checkingEntity) && hasVelocity(checkingEntity)) {
+        if (checkingEntity.movedThisTurn) {
+          const path = new HexSegment(checkingEntity.previousPosition, checkingEntity.position);
+          const box = path.boundingBox();
+
+          // broad-phase: generate list of possible colliding entities
+          const candidates = this.entities.filter((other) => {
+            if (this.turnCollisionPairs.includes([other, checkingEntity])) {
+              // exclude already-reported collisions.
+              // TODO: does this work?
+              return false;
+            }
+
+            if (hasPosition(other)) {
+              if (other.movedThisTurn) {
+                const otherPath = new HexSegment(other.previousPosition, other.position);
+                return box.overlaps(otherPath.boundingBox());
+              } else {
+                const { x, y } = other.position;
+                return box.contains(x, y);
+              }
+            } else {
+              return false;
+            }
+          });
+
+          candidates.forEach((cand) => {
+            // n = slower entity's path length
+            // sample faster entity's path n times
+            // does faster's path sample cross OR overlap slower's path sample?
+          });
+        }
       }
     });
   }
 
   passTurn() {
-    if (this.isCanonical) {
+    if (this.canonical) {
       this.processActionQueue();
       this.simulate();
       const events = this.flushEventQueue();

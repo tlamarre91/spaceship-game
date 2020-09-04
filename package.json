@@ -8,7 +8,8 @@
     "server": "node --enable-source-maps .",
     "dev": "nodemon --enable-source-maps",
     "debug": "node --enable-source-maps --inspect .",
-    "test": "jest"
+    "test": "jest",
+    "docker": "docker build -t tlamarre/spaceship-game ."
   },
   "dependencies": {
     "axios": "^0.19.2",

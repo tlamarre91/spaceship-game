@@ -47,6 +47,7 @@ export class Spaceship implements
   damagedBy: string[];
 
   constructor(params: Partial<Spaceship>) {
+    // ya know, we could probably just say Object.assign(this, params)
     this.id = params.id;
     this.playerRoleMap = params.playerRoleMap,
     this.spriteName = params.spriteName;
@@ -54,6 +55,7 @@ export class Spaceship implements
     this.teamId = params.teamId ?? "noteam";
     this.shipType = params.shipType ?? "notype";
     this.position = HexVector.copy(params.position);
+    this.previousPosition = this.position;
     this.velocity = params.velocity ? HexVector.copy(params.velocity) : HexVector.ZERO;
     this.rotation = params.rotation ?? 0;
     this.currentHitPoints = params.currentHitPoints ?? Spaceship.DEFAULT_HP;

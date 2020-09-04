@@ -39,11 +39,13 @@ export class Projectile implements
   createdBy: string | null;
 
   constructor(params: Partial<Projectile>) {
+    // ya know, we could probably just say Object.assign(this, params)
     this.id = params.id;
     this.spriteName = params.spriteName;
     this.spriteScale = params.spriteScale ?? 1;
     this.teamId = params.teamId ?? "noteam";
     this.position = HexVector.copy(params.position);
+    this.previousPosition = this.position;
     this.rotation = params.rotation;
     this.velocity = HexVector.copy(params.velocity);
     this.maxHitPoints = params.maxHitPoints ?? 1;

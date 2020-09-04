@@ -28,4 +28,8 @@ export class BoxRegion {
       return false;
     }
   }
+
+  contains(x: number, y: number): boolean {
+    return bounded(x, this.xMin, this.xMax) && bounded(y, this.yMin, this.yMax);
+  }
 };

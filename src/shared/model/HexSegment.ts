@@ -35,9 +35,13 @@ export class HexSegment {
     return new BoxRegion(xMin, xMax, yMin, yMax);
   }
 
-  broadPhase(other: HexSegment): boolean {
-    return this.boundingBox().overlaps(other.boundingBox());
+  gridLength(): number {
+    return this.start.gridDistance(this.end);
   }
+
+  //broadPhase(other: HexSegment): boolean {
+  //  return this.boundingBox().overlaps(other.boundingBox());
+  //}
 
   /**
    * Get the sub-segment spanning startPoint to endPoint distance along this
