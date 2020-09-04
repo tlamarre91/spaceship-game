@@ -5,7 +5,7 @@
 
 import { log } from "~shared/log";
 import { lerp } from "~shared/util";
-import { BoxRegion } from "./types";
+import { BoxRegion } from "./BoxRegion";
 
 export type HexSystem = "c" | "a"; // cubic or axial
 export type HexDirection = "y-z" | "z-y" | "x-z" | "z-x" | "y-x" | "x-y";

@@ -11,7 +11,8 @@ import {
   PLAYER_ROLES,
   GameEntity,
   HexVector,
-  Spaceship
+  Spaceship,
+  BoxRegion
 } from "~shared/model";
 
 import * as event from "~shared/model/GameEvent";
@@ -127,8 +128,7 @@ export class GameServer {
 
   private turnEndCallback = (events: event.GameEvent[]) => {
     try {
-      log.info("turnEndCallback events:");
-      log.info(JSON.stringify(events, null, 2));
+      log.info(`turnEndCallback events: ${JSON.stringify(events, null, 2)}`);
       this.emitToAll(net.TurnEnd.event, new net.TurnEnd(events));
       clearTimeout(this.turnHangingTimeout);
     } catch (err) {
@@ -232,7 +232,7 @@ export class GameServer {
       xMax: 10,
       yMin: 0,
       yMax: 10
-    }).cubicRound();
+    } as BoxRegion).cubicRound();
     const spaceship: Spaceship = new Spaceship({
       id,
       position,

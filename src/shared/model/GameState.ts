@@ -7,6 +7,9 @@ import {
   PlayerRole,
 } from "./types";
 
+import { HexVector } from "./HexVector";
+import { HexSegment } from "./HexSegment";
+
 import {
   GameEntity,
   GameEntityFromData,
@@ -29,7 +32,6 @@ import {
 import * as action from "./GameAction";
 import * as event from "./GameEvent";
 
-import { HexVector } from "./HexVector";
 import {
   ActionQueue,
   ActionQueueManager
@@ -52,29 +54,41 @@ export class GameState {
    * isCanonical: is this the canonical game instance, or a client instance?
    */
   readonly isCanonical: boolean;
-  entities: GameEntity[];
+  //entities: GameEntity[];
+  //readonly gameId: string;
+  //private entitiesById: Map<string, GameEntity>;
+  //private clientIdSpaceships: Map<string, Spaceship>;
+  //private spaceshipClientIds: Map<string, string[]>;
+  //private actionQueueManager: ActionQueueManager;
+  //private eventQueue: event.GameEvent[];
+  //private turnCollisionPairs: [GameEntity, GameEntity][];
+  //actionHistory: action.GameAction[][];
+  //eventHistory: event.GameEvent[][];
+  //listeners: GameStateListeners;
+  entities: GameEntity[] = [];
   readonly gameId: string;
-  private entitiesById: Map<string, GameEntity>;
-  private clientIdSpaceships: Map<string, Spaceship>;
-  private spaceshipClientIds: Map<string, string[]>;
-  private actionQueueManager: ActionQueueManager;
-  private eventQueue: event.GameEvent[];
-  actionHistory: action.GameAction[][];
-  eventHistory: event.GameEvent[][];
-  listeners: GameStateListeners;
+  private entitiesById: Map<string, GameEntity> = new Map();
+  private clientIdSpaceships: Map<string, Spaceship> = new Map();
+  private spaceshipClientIds: Map<string, string[]> = new Map();
+  private actionQueueManager: ActionQueueManager = new ActionQueueManager();
+  private eventQueue: event.GameEvent[] = [];
+  private turnCollisionPairs: [GameEntity, GameEntity][] = [];
+  actionHistory: action.GameAction[][] = [];
+  eventHistory: event.GameEvent[][] = [];
+  listeners: GameStateListeners = {};
 
   constructor(isCanonical: boolean = false) {
     this.isCanonical = isCanonical;
-    this.entities = [];
-    this.gameId = uuid();
-    this.entitiesById = new Map();
-    this.clientIdSpaceships = new Map();
-    this.spaceshipClientIds = new Map();
-    this.actionQueueManager = new ActionQueueManager();
-    this.eventQueue = [];
-    this.actionHistory = [[]];
-    this.eventHistory = [[]];
-    this.listeners = {};
+    //this.entities = [];
+    //this.gameId = uuid();
+    //this.entitiesById = new Map();
+    //this.clientIdSpaceships = new Map();
+    //this.spaceshipClientIds = new Map();
+    //this.actionQueueManager = new ActionQueueManager();
+    //this.eventQueue = [];
+    //this.actionHistory = [[]];
+    //this.eventHistory = [[]];
+    //this.listeners = {};
   }
 
   /**
@@ -327,25 +341,40 @@ export class GameState {
   }
 
   private simulate(deltaTime: number = 1) {
-    // TODO: collision detection, etc
     this.entities.forEach((e) => {
+      log.info(`simulating entity ${idtrim(e.id)}`);
       if (hasVelocity(e) && hasPosition(e)) {
         const deltaP: HexVector = deltaTime == 1 ? e.velocity : e.velocity.times(deltaTime);
         if (! deltaP.equals(HexVector.ZERO)) {
           e.position = e.position.plus(deltaP);
+          //e.movedThisTurn = true;
           const ev = new event.EntityMoved(e.id, e.position);
           this.eventQueue.push(ev);
           this.listeners?.onEntityMoved?.(e);
+        } else {
+          log.info("thing didn't move");
+          //e.movedThisTurn = false;
         }
+      } else {
+        log.info(`${idtrim(e.id)} ain't got no position`);
       }
     });
   }
 
   /**
    * Check each entity's path during the last simulation step and see if any
-   * paths overlap. If they do... do something
+   * of them collided. If they did... do something!
+   *
+   * @remarks
+   * Should only be called on canonical GameState
    */
   private detectCollisions() {
+    this.entities.forEach((e, i) => {
+      if (hasPosition(e) && hasVelocity(e)) {
+        // TODO: WRONG! first detect if entity moved this turn.
+        const path = new HexSegment(e.previousPosition, e.position);
+      }
+    });
   }
 
   passTurn() {

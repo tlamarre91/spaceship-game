@@ -143,6 +143,7 @@ export class GameClient {
     } = msg;
 
     this.mySpaceshipId = yourShipId;
+    this.components.debug.setEntry("my ship id", idtrim(yourShipId));
     this.components.board.initializeGameState(this.mySpaceshipId, entityData);
   }
 

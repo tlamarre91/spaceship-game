@@ -113,6 +113,6 @@ describe("HexVector (randomized)", () => {
 });
 
 describe("HexVector (methods)", () => {
-  it("pathTo() generates a grid path between two vectors", () => {
-  );
+  it.skip("pathTo() generates a grid path between two vectors", () => {
+  });
 });
