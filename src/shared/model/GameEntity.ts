@@ -34,8 +34,8 @@ export interface GameEntity {
   readonly id: string;
   readonly entityType: GameEntityType;
   spritesheetName?: string;
-  spriteName: string;
-  spriteScale: number;
+  spriteName?: string;
+  spriteScale?: number;
   copyData(): object;
 }
 
@@ -43,7 +43,7 @@ export interface GameEntity {
  * GameEntityFromData: build a GameEntity from a data object.
  * (why not static function? Because GameEntity is an interface, not a class)
  */
-export function GameEntityFromData(entityData: GameEntity): GameEntity {
+export function GameEntityFromData(entityData: GameEntity): GameEntity | null{
   if (! entityData.entityType) {
     throw new Error(`object has no entityType (id: ${idtrim(entityData?.id)})`);
   }
@@ -53,6 +53,8 @@ export function GameEntityFromData(entityData: GameEntity): GameEntity {
       return new Spaceship(entityData);
     } else if (isProjectile(entityData)) {
       return new Projectile(entityData);
+    } else {
+      throw Error(`GameEntityFromData: unknown entity type ${entityData.entityType}`);
     }
   } catch (err) {
     log.error(`GameEntityFromData: ${err}`);
@@ -68,21 +70,21 @@ export interface PlayerControlledEntity extends GameEntity {
 
 export interface PositionEntity extends GameEntity {
   position: HexVector;
-  previousPosition?: HexVector;
+  previousPosition: HexVector;
   movedThisTurn?: boolean;
   setPosition(position: HexVector): void;
 }
 
-export function hasPosition(entity: GameEntity): entity is PositionEntity {
-  return "position" in entity;
+export function hasPosition(entity?: GameEntity): entity is PositionEntity {
+  return entity ? "position" in entity : false;
 }
 
 export interface RotationEntity extends GameEntity {
   rotation: number;
 }
 
-export function hasRotation(entity: GameEntity): entity is RotationEntity {
-  return "rotation" in entity;
+export function hasRotation(entity?: GameEntity): entity is RotationEntity {
+  return entity ? "rotation" in entity : false;
 }
 
 export interface HitPointsEntity extends GameEntity {
@@ -92,8 +94,8 @@ export interface HitPointsEntity extends GameEntity {
   //dead: boolean; // not sure yet how to handle killing ships
 }
 
-export function hasHitPoints(entity: GameEntity): entity is HitPointsEntity {
-  return "currentHitPoints" in entity;
+export function hasHitPoints(entity?: GameEntity): entity is HitPointsEntity {
+  return entity ? "currentHitPoints" in entity : false;
 }
 
 export interface VelocityEntity extends GameEntity {
@@ -101,14 +103,14 @@ export interface VelocityEntity extends GameEntity {
   accelerate(v: HexVector): HexVector;
 }
 
-export function hasVelocity(entity: GameEntity): entity is VelocityEntity {
-  return "velocity" in entity;
+export function hasVelocity(entity?: GameEntity): entity is VelocityEntity {
+  return entity ? "velocity" in entity : false;
 }
 
 export interface TeamEntity extends GameEntity {
   teamId: string;
 }
 
-export function hasTeam(entity: GameEntity): entity is TeamEntity {
-  return "teamId" in entity;
+export function hasTeam(entity?: GameEntity): entity is TeamEntity {
+  return entity ? "teamId" in entity : false;
 }

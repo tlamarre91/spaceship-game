@@ -22,8 +22,8 @@ import * as net from "~shared/net";
 import { GameState } from "~shared/model/GameState";
 
 export interface GameServerConfig {
-  port?: string | number;
-  spamThreshold?: number;
+  port: number;
+  spamThreshold: number;
   /**
    * turnLength: length of turn in ms
    */
@@ -44,7 +44,7 @@ const CONFIG_DEFAULTS: GameServerConfig = {
 export class GameServer {
   static readonly PORT: number = 3000;
   httpServer: http.Server;
-  port: string | number;
+  port: number;
   gameState: GameState;
   private spamThreshold: number;
   private io: socketio.Server;
@@ -66,7 +66,7 @@ export class GameServer {
     this.config(config);
   }
 
-  private config(config?: Partial<GameServerConfig>): void {
+  private config(config: Partial<GameServerConfig> = {}): void {
     this.port = config?.port ?? CONFIG_DEFAULTS.port;
     this.spamThreshold = config?.spamThreshold ?? CONFIG_DEFAULTS.spamThreshold;
     this.turnLength = config?.turnLength ?? CONFIG_DEFAULTS.turnLength;
@@ -87,13 +87,15 @@ export class GameServer {
 
   cleanupSocket(socket: socketio.Socket) {
     const clientId = this.socketClientMap.getSocketClient(socket.id);
-    this.onQuit(clientId);
+    if (clientId) {
+      this.onQuit(clientId);
+    }
     this.socketClientMap.delete(socket.id);
   };
 
   emitToClient(clientId: string, event: string, msg: net.Message) {
     const socket = this.socketClientMap.getClientSocket(clientId);
-    socket.emit(event, msg);
+    if (socket) socket.emit(event, msg);
   }
 
   emitToAll(event: string, msg: net.Message) {
@@ -175,7 +177,11 @@ export class GameServer {
       socket.on(net.Quit.event, (msg: net.Quit) => {
         try {
           let clientId = this.socketClientMap.getSocketClient(socket.id);
-          this.onQuit(clientId, msg);
+          if (clientId) {
+            this.onQuit(clientId, msg);
+          } else {
+            // TODO: warn or something?
+          }
           this.socketClientMap.delete(socket.id);
         } catch (err) {
           log.warn(`socket.on(Quit): ${err}`);
@@ -184,12 +190,20 @@ export class GameServer {
 
       socket.on(net.SetActionQueue.event, (msg: net.SetActionQueue) => {
         let clientId = this.socketClientMap.getSocketClient(socket.id);
-        this.onSetActionQueue(clientId, msg);
+        if (clientId) {
+          this.onSetActionQueue(clientId, msg);
+        } else {
+          // TODO: warn or something?
+        }
       });
 
       socket.on(net.SetMultipleActionQueues.event, (msg: net.SetMultipleActionQueues) => {
         let clientId = this.socketClientMap.getSocketClient(socket.id);
-        this.onSetMultipleActionQueues(clientId, msg);
+        if (clientId) {
+          this.onSetMultipleActionQueues(clientId, msg);
+        } else {
+          // TODO: warn or something?
+        }
       });
 
       socket.on(net.GamePing.event, () => {
@@ -217,7 +231,11 @@ export class GameServer {
 
   removePlayer(clientId: string) {
     const spaceship = this.gameState.getClientIdSpaceship(clientId);
-    this.gameState.removeEntity(spaceship);
+    if (spaceship) {
+      this.gameState.removeEntity(spaceship);
+    } else {
+      // TODO: warn or something?
+    }
   }
 
   onJoin = (msg: net.Join) => {
@@ -260,7 +278,11 @@ export class GameServer {
     } = msg;
     try {
       const spaceship = this.gameState.getClientIdSpaceship(clientId);
-      this.gameState.setActionQueue(spaceship.id, role, actions);
+      if (spaceship) {
+        this.gameState.setActionQueue(spaceship.id, role, actions);
+      } else {
+        // TODO: warn or something?
+      }
       // TODO: get teammate ids, send message to update their local action queues 
     } catch (err) {
       log.error(`onSetActionQueue: ${err as Error}`);
@@ -276,13 +298,17 @@ export class GameServer {
       const spaceship = this.gameState.getClientIdSpaceship(clientId);
       log.info(`onSetMultipleActionQueues: ${JSON.stringify(msg, null, 2)}`);
 
-      roleActionTuples.forEach(([role, actions]) => {
-        try {
-          this.gameState.setActionQueue(spaceship.id, role, actions);
-        } catch (err) {
-          log.error(`onSetMultipleActionQueues: ${err}`);
-        }
-      });
+      if (spaceship) {
+        roleActionTuples.forEach(([role, actions]) => {
+          try {
+            this.gameState.setActionQueue(spaceship.id, role, actions);
+          } catch (err) {
+            log.error(`onSetMultipleActionQueues: ${err}`);
+          }
+        });
+      } else {
+        // TODO: warn or something?
+      }
     } catch (err) {
       log.error(`onSetMultipleActionQueues: ${err}`);
     }

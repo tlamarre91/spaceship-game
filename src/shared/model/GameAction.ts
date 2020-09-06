@@ -1,4 +1,4 @@
-import * as uuid from "uuid";
+import { v4 as uuid } from "uuid";
 import { HexVector } from "./HexVector";
 import { PlayerRole } from "./types";
 
@@ -11,6 +11,9 @@ export const ACTION_TYPES: Record<string, ActionType> = {
   SpawnProjectile: "s"
 }
 
+/**
+ * A pending action 
+ */
 export interface GameAction {
   readonly actionType: ActionType;
   readonly playerRole: PlayerRole;
@@ -21,13 +24,9 @@ export interface GameAction {
 export class AccelerateSelf implements GameAction {
   readonly actionType = ACTION_TYPES.AccelerateSelf;
   readonly playerRole = "n";
-  readonly actionId: string;
-  //readonly entityId: string;
-  readonly deltaVelocity: HexVector;
+  readonly actionId: string = uuid();
 
-  constructor(deltaVelocity: HexVector) {
-    this.deltaVelocity = deltaVelocity;
-  }
+  constructor(readonly deltaVelocity: HexVector) { }
 }
 
 export function isAccelerateSelf(action: GameAction): action is AccelerateSelf {
@@ -37,13 +36,10 @@ export function isAccelerateSelf(action: GameAction): action is AccelerateSelf {
 export class SpawnProjectile implements GameAction {
   readonly actionType = ACTION_TYPES.SpawnProjectile;
   readonly playerRole = "w";
-  readonly actionId: string;
+  readonly actionId: string = uuid();
   //readonly entityId: string;
-  readonly initialVelocity: HexVector;
 
-  constructor(initialVelocity: HexVector) {
-    this.initialVelocity = initialVelocity;
-  }
+  constructor(readonly initialVelocity: HexVector) { }
 }
 
 export function isSpawnProjectile(action: GameAction): action is SpawnProjectile {

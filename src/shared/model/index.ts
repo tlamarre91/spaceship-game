@@ -8,3 +8,4 @@ export * from "./GameState";
 export * from "./GameEntity";
 export * from "./Spaceship";
 export * from "./Projectile";
+export * from "./VisualDebugItem";

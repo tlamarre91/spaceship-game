@@ -3,12 +3,14 @@ import {
   HEX_DIRECTIONS
 } from "./HexVector";
 
+import { BoxRegion } from "./BoxRegion";
+
 const box = {
   xMin: -1000,
   xMax: 1000,
   yMin: -1000,
   yMax: 1000,
-};
+} as BoxRegion;
 
 describe("HexVector (basic)", () => {
   it("validates cubic coordinates", () => {

@@ -182,7 +182,7 @@ export class HexVector {
       const { x, y, z } = this.toCubic();
       return Math.abs(v.x - x) <= HexVector.EPSILON &&
         Math.abs(v.y - y) <= HexVector.EPSILON &&
-        Math.abs(v.z - z) <= HexVector.EPSILON;
+        Math.abs(v.z! - z!) <= HexVector.EPSILON;
     } else {
       const { x, y } = this.toAxial();
       return Math.abs(v.x - x) <= HexVector.EPSILON &&
@@ -193,7 +193,7 @@ export class HexVector {
   plus(v: HexVector): HexVector {
     if (v.system == "c") {
       const { x, y, z } = this.toCubic();
-      return HexVector.fromCubicCoordinates(x + v.x, y + v.y, z + v.z);
+      return HexVector.fromCubicCoordinates(x + v.x, y + v.y, z! + v.z!);
     } else {
       const {x, y} = this.toAxial();
       return HexVector.fromAxialCoordinates(x + v.x, y + v.y);
@@ -203,7 +203,7 @@ export class HexVector {
   minus(v: HexVector): HexVector {
     if (v.system == "c") {
       const { x, y, z } = this.toCubic();
-      return HexVector.fromCubicCoordinates(x - v.x, y - v.y, z - v.z);
+      return HexVector.fromCubicCoordinates(x - v.x, y - v.y, z! - v.z!);
     } else {
       const { x, y } = this.toAxial();
       return HexVector.fromAxialCoordinates(x - v.x, y - v.y);
@@ -213,7 +213,7 @@ export class HexVector {
   times(scalar: number): HexVector {
     if (this.system == "c") {
       const { x, y, z } = this;
-      return HexVector.fromCubicCoordinates(x * scalar, y * scalar, z * scalar);
+      return HexVector.fromCubicCoordinates(x * scalar, y * scalar, z! * scalar);
     } else {
       const { x, y } = this;
       return HexVector.fromAxialCoordinates(x * scalar, y * scalar);
@@ -234,7 +234,7 @@ export class HexVector {
   gridDistance(v: HexVector): number {
     const { x, y, z } = this.cubicRound();
     const rv = v.cubicRound();
-    return (Math.abs(x - rv.x) + Math.abs(y - rv.y) + Math.abs(z - rv.z)) / 2;
+    return (Math.abs(x - rv.x) + Math.abs(y - rv.y) + Math.abs(z! - rv.z!)) / 2;
   }
 
   gridMagnitude(): number {
@@ -247,7 +247,7 @@ export class HexVector {
   cubicRound(): HexVector {
     const { x, y, z } = this.toCubic();
     let [rx, ry, rz] = [x, y, z].map(Math.round);
-    const [dx, dy, dz] = [Math.abs(rx - x), Math.abs(ry - y), Math.abs(rz - z)];
+    const [dx, dy, dz] = [Math.abs(rx - x), Math.abs(ry - y), Math.abs(rz - z!)];
     if (dx > dy && dx > dz) {
       rx = - ry - rz;
     } else if (dy > dz) {
@@ -269,7 +269,7 @@ export class HexVector {
     return HexVector.fromCubicCoordinates(
       lerp(x, w.x, t),
       lerp(y, w.y, t),
-      lerp(z, w.z, t)
+      lerp(z!, w.z!, t)
     );
   }
 

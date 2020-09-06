@@ -1,5 +1,6 @@
 import * as Pixi from "pixi.js";
 import { log } from "~shared/log";
+import { idtrim } from "~shared/util";
 import {
   GameEntity,
   HexVector,
@@ -34,10 +35,14 @@ export class RenderedEntityContainer {
     }
 
     let texture: Pixi.Texture;
-    if (entity.spritesheetName) {
-      texture = this.resources[entity.spritesheetName].textures[entity.spriteName];
+    if (entity.spriteName) {
+      if (entity.spritesheetName) {
+        texture = this.resources[entity.spritesheetName].textures![entity.spriteName];
+      } else {
+        texture = this.resources[entity.spriteName].texture;
+      }
     } else {
-      texture = this.resources[entity.spriteName].texture;
+      throw new Error(`tried to render entity ${idtrim(entity.id)} with no spriteName`);
     }
 
     const sprite = new Pixi.Sprite(texture);
@@ -52,7 +57,7 @@ export class RenderedEntityContainer {
     this.container.addChild(renderedEntity.sprite);
   }
 
-  getEntity(id: string): RenderedEntity {
+  getEntity(id: string): RenderedEntity | undefined {
     return this.renderedEntitiesById.get(id);
   }
 
@@ -64,11 +69,11 @@ export class RenderedEntityContainer {
     });
   }
 
-  removeEntity(renderedEntity: RenderedEntity): RenderedEntity {
+  removeEntity(renderedEntity: RenderedEntity): RenderedEntity | undefined {
     return this.removeEntityById(renderedEntity.entity.id);
   }
 
-  removeEntityById(id: string): RenderedEntity {
+  removeEntityById(id: string): RenderedEntity | undefined {
     const e = this.renderedEntitiesById.get(id);
     if (e) {
       this.container.removeChild(e.sprite);

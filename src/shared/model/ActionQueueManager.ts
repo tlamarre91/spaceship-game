@@ -37,7 +37,7 @@ export class ActionQueueManager {
     this.queues.delete(entityId);
   }
 
-  getActionQueue(entityId: string): ActionQueue {
+  getActionQueue(entityId: string): ActionQueue | undefined {
     return this.queues.get(entityId);
   }
 

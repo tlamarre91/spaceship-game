@@ -26,7 +26,7 @@ function main() {
 
 
   const gameContainer = document.getElementById("game");
-  gameContainer.appendChild(pixiApp.view);
+  gameContainer?.appendChild(pixiApp.view);
 
   pixiApp.loader
     .add("bg", makeAssetUrl("space-bg.png"))
@@ -35,7 +35,9 @@ function main() {
     .add("hexagons", makeAssetUrl("hexagons.json"))
     .add("hgradient", makeAssetUrl("hgradient.png"))
     .load((loader, resources) => {
-      const client = new GameClient(pixiApp, loader, resources);
+      const myResources: Record<string, Pixi.LoaderResource> = { };
+      Object.assign(myResources, resources); // TODO: this might be terrible
+      const client = new GameClient(pixiApp, loader, myResources);
       client.start();
 
       window.onresize = client.onWindowResize;

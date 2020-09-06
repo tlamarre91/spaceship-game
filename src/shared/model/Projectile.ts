@@ -1,3 +1,5 @@
+import { v4 as uuid } from "uuid";
+
 import { log } from "~shared/log";
 import { idtrim } from "~shared/util";
 import { HexVector } from "./HexVector";
@@ -26,8 +28,8 @@ export class Projectile implements
 {
   readonly id: string;
   readonly entityType: GameEntityType = GAME_ENTITY_TYPES.Projectile;
-  readonly spriteName: string;
-  readonly spriteScale: number;
+  readonly spriteName?: string;
+  readonly spriteScale?: number;
   teamId: string;
   position: HexVector;
   previousPosition: HexVector;
@@ -40,18 +42,20 @@ export class Projectile implements
 
   constructor(params: Partial<Projectile>) {
     // ya know, we could probably just say Object.assign(this, params)
-    this.id = params.id;
+    this.id = params.id ?? uuid();
     this.spriteName = params.spriteName;
     this.spriteScale = params.spriteScale ?? 1;
     this.teamId = params.teamId ?? "noteam";
-    this.position = HexVector.copy(params.position);
-    this.previousPosition = this.position;
-    this.rotation = params.rotation;
-    this.velocity = HexVector.copy(params.velocity);
+    this.position = params.position ? HexVector.copy(params.position) : HexVector.ZERO;
+    this.previousPosition = params.previousPosition ?
+      HexVector.copy(params.previousPosition)
+      : this.position;
+    this.velocity = params.velocity ? HexVector.copy(params.velocity) : HexVector.ZERO;
+    this.rotation = params.rotation ?? 0;
     this.maxHitPoints = params.maxHitPoints ?? 1;
     this.currentHitPoints = params.currentHitPoints ?? this.maxHitPoints;
     this.damage = params.damage ?? 1;
-    this.createdBy = params.createdBy;
+    this.createdBy = params.createdBy ?? null;
   }
 
   setPosition(position: HexVector) {
@@ -81,7 +85,7 @@ export class Projectile implements
   }
 }
 
-export function isProjectile(entity: GameEntity): entity is Projectile {
-  return entity.entityType == GAME_ENTITY_TYPES.Projectile;
+export function isProjectile(entity?: GameEntity): entity is Projectile {
+  return entity ? entity.entityType == GAME_ENTITY_TYPES.Projectile : false;
 }
 

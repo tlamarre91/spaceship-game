@@ -133,7 +133,7 @@ export class GameClient {
 
     this.lastPongTime = Date.now();
     this.averagePing = this.lastPongTime - this.lastPingTime;
-    this.components.debug.setEntry("ping", this.averagePing.toString());
+    this.components.debug.setTextEntry("ping", this.averagePing.toString());
   }
 
   onInitializeGameState = (msg: net.InitializeGameState) => {
@@ -143,7 +143,7 @@ export class GameClient {
     } = msg;
 
     this.mySpaceshipId = yourShipId;
-    this.components.debug.setEntry("my ship id", idtrim(yourShipId));
+    this.components.debug.setTextEntry("my ship id", idtrim(yourShipId));
     this.components.board.initializeGameState(this.mySpaceshipId, entityData);
   }
 
@@ -175,8 +175,11 @@ export class GameClient {
 
   sendActionQueues = () => {
     const controlsOutput = this.components.controls.getOutput();
-    const accel = new action.AccelerateSelf(controlsOutput.acceleration);
-    let roleActionTuples: [PlayerRole, action.GameAction[]][] = [["n", [accel]]];
+    let roleActionTuples: [PlayerRole, action.GameAction[]][] = [];
+    if (controlsOutput.acceleration) {
+      const accel = new action.AccelerateSelf(controlsOutput.acceleration);
+      roleActionTuples.push(["n", [accel]]);
+    }
     const shootVector = controlsOutput.shooting;
     if (shootVector) {
       const shoot = new action.SpawnProjectile(shootVector);
@@ -216,13 +219,15 @@ export class GameClient {
     }
   }
 
+
   setupComponents() {
+    const boardScale = 30;
     const boardConfig = {
       origin: {
         x: this.viewport.width / 2,
         y: this.viewport.height / 2
       },
-      boardScale: 30
+      boardScale
     };
 
     const controlsConfig = {
@@ -235,21 +240,26 @@ export class GameClient {
       height: 10
     };
 
+    const debugConfig = {
+      boardScale
+    }
+
     this.components = {
       board: new GameBoard(this.resources, this.viewport, boardConfig),
       clock: new VisualClock(this.resources, clockConfig),
       controls: new VisualControls(this.resources, controlsConfig),
-      debug: new VisualDebug(),
+      debug: new VisualDebug(this.resources, debugConfig),
     };
 
     this.components.controls.addHandler(this.onControlsChange);
-    this.components.debug.setEntry("clientId", idtrim(this.clientId));
+    this.components.debug.setTextEntry("clientId", idtrim(this.clientId));
 
     //this.viewport.removeChildren();
-    this.viewport.addChild(this.components.board.container);
-    this.pixiApp.stage.addChild(this.components.debug.renderedText);
-    this.pixiApp.stage.addChild(this.components.controls.container);
     this.pixiApp.stage.addChild(this.components.clock.container);
+    this.pixiApp.stage.addChild(this.components.controls.container);
+    this.pixiApp.stage.addChild(this.components.debug.renderedText);
+    this.viewport.addChild(this.components.board.container);
+    this.viewport.addChild(this.components.debug.viewportContainer);
   }
 
   setupSocket() {

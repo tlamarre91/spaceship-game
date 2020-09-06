@@ -11,11 +11,11 @@ export class SocketClientMap {
     this.socketClientMap = new Map();
   }
 
-  getSocketClient(socketId: string): string {
+  getSocketClient(socketId: string) {
     return this.socketClientMap.get(socketId);
   }
 
-  getClientSocket(clientId: string): socketio.Socket {
+  getClientSocket(clientId: string) {
     return this.clientSocketMap.get(clientId);
   }
 
@@ -28,7 +28,7 @@ export class SocketClientMap {
   delete(socketId?: string, clientId?: string) {
     const mismatch = socketId && clientId &&
       (
-        this.clientSocketMap.get(clientId).id != socketId ||
+        this.clientSocketMap.get(clientId)?.id != socketId ||
         this.socketClientMap.get(socketId) != clientId
       );
     if (mismatch) {
@@ -36,15 +36,19 @@ export class SocketClientMap {
     }
 
     if (socketId) {
-      const val = this.socketClientMap.get(socketId);
+      const clientId = this.socketClientMap.get(socketId);
       this.socketClientMap.delete(socketId);
-      this.clientSocketMap.delete(val);
+      if (clientId) {
+        this.clientSocketMap.delete(clientId);
+      }
     }
 
     if (clientId) {
-      const socketId = this.clientSocketMap.get(clientId).id;
+      const socketId = this.clientSocketMap.get(clientId)?.id;
       this.clientSocketMap.delete(clientId);
-      this.socketClientMap.delete(socketId);
+      if(socketId) {
+        this.socketClientMap.delete(socketId);
+      }
     }
   }
 }

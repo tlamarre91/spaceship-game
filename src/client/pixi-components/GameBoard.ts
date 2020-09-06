@@ -43,7 +43,7 @@ export class GameBoard {
     this.origin = config.origin;
     this.boardScale = config.boardScale;
 
-    const hexagons = resources["hexagons"].textures;
+    const hexagons = resources["hexagons"].textures!;
     this.textures = {
       "hexagon": hexagons["hexagon"],
       "hexagon-outline": hexagons["hexagon-outline"],

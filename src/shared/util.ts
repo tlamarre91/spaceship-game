@@ -23,3 +23,7 @@ export function cross2D(x1: number, y1: number, x2: number, y2: number): number 
 export function idtrim(uuid: string): string {
   return uuid?.slice(-8);
 }
+
+export function increasingSortFn(a: number, b: number): number {
+  return a - b;
+}

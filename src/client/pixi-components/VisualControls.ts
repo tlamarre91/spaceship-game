@@ -14,8 +14,8 @@ export interface VisualControlsConfig {
 }
 
 export interface VisualControlsOutput {
-  acceleration: HexVector;
-  shooting: HexVector;
+  acceleration?: HexVector;
+  shooting?: HexVector;
 }
 
 export class VisualControls {
@@ -63,7 +63,7 @@ export class VisualControls {
 
     HEX_DIRECTIONS.forEach((dir) => {
       const v = HexVector.direction(dir);
-      const accelSprite = new Pixi.Sprite(this.resources["hexagons"].textures["hexagon-light"]);
+      const accelSprite = new Pixi.Sprite(this.resources["hexagons"].textures!["hexagon-light"]);
       const [x, y] = v.toCartesian(30);
       accelSprite.anchor.x = 0.5;
       accelSprite.anchor.y = 0.5;
@@ -79,7 +79,7 @@ export class VisualControls {
       this.accelControlsContainer.addChild(accelSprite);
       this.accelSprites.push(accelSprite);
 
-      const shootSprite = new Pixi.Sprite(this.resources["hexagons"].textures["hexagon-light"]);
+      const shootSprite = new Pixi.Sprite(this.resources["hexagons"].textures!["hexagon-light"]);
       shootSprite.anchor.x = 0.5;
       shootSprite.anchor.y = 0.5;
       shootSprite.x = x;
@@ -127,7 +127,7 @@ export class VisualControls {
       acceleration = HexVector.direction(this.acceleration.direction).times(this.acceleration.value);
     }
 
-    let shooting: HexVector = this.shooting.direction ? HexVector.direction(this.shooting.direction) : null;
+    let shooting = this.shooting.direction ? HexVector.direction(this.shooting.direction) : undefined;
 
     return {
       acceleration,

@@ -1,6 +1,9 @@
 import { log } from "~shared/log";
 import { bounded } from "~shared/util";
 
+/**
+ * Representation of a rectangle (or parallelogram in HexVector space) region
+ */
 export class BoxRegion {
   xMin: number;
   xMax: number;
@@ -29,7 +32,14 @@ export class BoxRegion {
     }
   }
 
+  /**
+   * Compute whether this BoxRegion contains a point
+   */
   contains(x: number, y: number): boolean {
     return bounded(x, this.xMin, this.xMax) && bounded(y, this.yMin, this.yMax);
+  }
+
+  toString(): string {
+    return `BoxRegion(${this.xMin}, ${this.xMax}, ${this.yMin}, ${this.yMax})`;
   }
 };

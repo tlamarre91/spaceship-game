@@ -3,7 +3,8 @@ import { BoxRegion } from "./BoxRegion";
 import {
   lerp,
   bounded,
-  cross2D
+  cross2D,
+  increasingSortFn
 } from "~shared/util";
 
 import {
@@ -19,6 +20,9 @@ export class HexSegment {
     this.end = end;
   }
 
+  /**
+   * Compute the BoxRegion containing both endpoints of this HexSegment
+   */
   boundingBox(): BoxRegion {
     const {
       x: x1,
@@ -29,8 +33,8 @@ export class HexSegment {
       y: y2
     } = this.end;
 
-    const [xMin, xMax] = [x1, x2].sort();
-    const [yMin, yMax] = [y1, y2].sort();
+    const [xMin, xMax] = [x1, x2].sort(increasingSortFn);
+    const [yMin, yMax] = [y1, y2].sort(increasingSortFn);
 
     return new BoxRegion(xMin, xMax, yMin, yMax);
   }
@@ -61,7 +65,7 @@ export class HexSegment {
    * @remarks
    * based on https://stackoverflow.com/a/1968345
    * No, I do not know how it works. This method should be used in conjunction
-   * with gridOverlap(other) and broadPhase(other) to compute collisions.
+   * with a broad-phase filter and gridOverlap(other) to compute collisions.
    */
   intersection(other: HexSegment): HexVector | null {
     const {
@@ -81,7 +85,7 @@ export class HexSegment {
       y: y4
     } = other.end;
 
-    const dx1 = x2 - x1;
+    const dx1 = x2 - x1; 
     const dy1 = y2 - y1;
     const dx2 = x4 - x3;
     const dy2 = y4 - y3;

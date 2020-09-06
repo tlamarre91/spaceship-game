@@ -15,7 +15,7 @@ const SERVE_STATIC = true;
 const app = express();
 const httpServer = http.createServer(app);
 
-if (NODE_ENV == "development" && SERVE_STATIC) {
+if (NODE_ENV == "development" && SERVE_STATIC && process.env.STATIC_DIR) {
   app.use(express.static(process.env.STATIC_DIR));
   log.info("serving static content");
 } else {

@@ -9,14 +9,14 @@ export class Keybind {
 
   constructor(value: string, onPress?: () => void, onRelease?: () => void, debug?: boolean) {
     this.value = value;
-    this.debug = debug;
+    this.debug = debug ?? false;
     this.onPress = onPress;
     this.onRelease = onRelease;
   }
 
   downHandler(event: KeyboardEvent) {
     if (event.key == this.value) {
-      if (this.isUp) this?.onPress();
+      if (this.isUp) this.onPress?.();
       this.isUp = false;
       this.isDown = true;
       event.preventDefault();
@@ -25,7 +25,7 @@ export class Keybind {
 
   upHandler(event: KeyboardEvent) {
     if (event.key == this.value) {
-      if (this.isDown) this?.onRelease();
+      if (this.isDown) this.onRelease?.();
       this.isDown = false;
       this.isUp = true;
       event.preventDefault();
@@ -69,26 +69,30 @@ export class MouseKeyboardController {
   }
 
   horizontalMoveOutput(): number {
-    if (this.keyHandlers.get("moveLeft").isDown) {
-      if (this.keyHandlers.get("moveRight").isDown) {
+    if (this.keyHandlers.get("moveLeft")?.isDown) {
+      if (this.keyHandlers.get("moveRight")?.isDown) {
         return 0;
       } else {
         return -1;
       }
-    } else if (this.keyHandlers.get("moveRight").isDown) {
+    } else if (this.keyHandlers.get("moveRight")?.isDown) {
       return 1;
+    } else {
+      return 0;
     }
   }
 
   verticalMoveOutput(): number {
-    if (this.keyHandlers.get("moveUp").isDown) {
-      if (this.keyHandlers.get("moveDown").isDown) {
+    if (this.keyHandlers.get("moveUp")?.isDown) {
+      if (this.keyHandlers.get("moveDown")?.isDown) {
         return 0;
       } else {
         return 1;
       }
-    } else if (this.keyHandlers.get("moveDown").isDown) {
+    } else if (this.keyHandlers.get("moveDown")?.isDown) {
       return -1;
+    } else {
+      return 0;
     }
   }
 

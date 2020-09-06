@@ -1,3 +1,5 @@
+import { v4 as uuid } from "uuid";
+
 import { log } from "~shared/log";
 import { idtrim } from "~shared/util";
 import { HexVector } from "./HexVector";
@@ -34,8 +36,8 @@ export class Spaceship implements
   readonly entityType: GameEntityType = GAME_ENTITY_TYPES.Spaceship;
   playerRoleMap: Map<PlayerRole, string>;
   readonly spritesheetName: string = "ships";
-  readonly spriteName: string;
-  readonly spriteScale: number;
+  readonly spriteName?: string;
+  readonly spriteScale?: number;
   teamId: string;
   shipType: string;
   position: HexVector;
@@ -46,16 +48,18 @@ export class Spaceship implements
   velocity: HexVector;
   damagedBy: string[];
 
-  constructor(params: Partial<Spaceship>) {
+  constructor(params: Partial<Spaceship> = {}) {
     // ya know, we could probably just say Object.assign(this, params)
-    this.id = params.id;
-    this.playerRoleMap = params.playerRoleMap,
+    this.id = params.id ?? uuid();
+    this.playerRoleMap = params.playerRoleMap ?? new Map(),
     this.spriteName = params.spriteName;
     this.spriteScale = params.spriteScale;
     this.teamId = params.teamId ?? "noteam";
     this.shipType = params.shipType ?? "notype";
-    this.position = HexVector.copy(params.position);
-    this.previousPosition = this.position;
+    this.position = params.position ? HexVector.copy(params.position) : HexVector.ZERO;
+    this.previousPosition = params.previousPosition ?
+      HexVector.copy(params.previousPosition)
+      : this.position;
     this.velocity = params.velocity ? HexVector.copy(params.velocity) : HexVector.ZERO;
     this.rotation = params.rotation ?? 0;
     this.currentHitPoints = params.currentHitPoints ?? Spaceship.DEFAULT_HP;
@@ -122,6 +126,6 @@ export class Spaceship implements
   }
 }
 
-export function isSpaceship(entity: GameEntity): entity is Spaceship {
-  return entity.entityType == GAME_ENTITY_TYPES.Spaceship;
+export function isSpaceship(entity?: GameEntity): entity is Spaceship {
+  return entity ? entity.entityType == GAME_ENTITY_TYPES.Spaceship : false;
 }

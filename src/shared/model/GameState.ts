@@ -74,6 +74,10 @@ export class GameState {
   readonly debug: boolean;
 
   /**
+   * 
+   */
+
+  /**
    * All entities that currently exist in this GameState
    */
   entities: GameEntity[] = [];
@@ -119,6 +123,10 @@ export class GameState {
     entityData
       .map(data => GameEntityFromData(data as GameEntity))
       .forEach((entity) => {
+        if (! entity) {
+          return null;
+        }
+
         if (isSpaceship(entity)) {
           gameState.addSpaceship(entity);
         } else {
@@ -168,11 +176,11 @@ export class GameState {
     this.spaceshipClientIds.set(spaceship.id, clientIds);
   }
 
-  removeEntity(entity: GameEntity): GameEntity {
+  removeEntity(entity: GameEntity): GameEntity | null {
     return this.removeEntityId(entity?.id);
   }
 
-  removeEntityId(entityId: string): GameEntity {
+  removeEntityId(entityId: string): GameEntity | null {
     if (! entityId) {
       log.warn(`tried removing entity with id ${entityId}`);
       return null;
@@ -180,24 +188,28 @@ export class GameState {
 
     const entity = this.entitiesById.get(entityId);
     if (! entity) {
-      log.warn(`removeEntityId: entity with id ${idtrim(entity?.id)} does not exist`);
+      log.warn(`removeEntityId: could not find entity with id ${idtrim(entityId)}`);
     } else {
       this.entitiesById.delete(entityId);
+      if (isSpaceship(entity)) {
+        const clientIds = this.spaceshipClientIds.get(entityId);
+        this.spaceshipClientIds.delete(entityId);
+        this.actionQueueManager.removeSpaceship(entityId);
+        if (clientIds) {
+          clientIds.forEach(id => this.clientIdSpaceships.delete(id));
+        }
+
+        return entity;
+      }
     }
 
+    // even though we didn't find it in entitiesById, try filtering entities anyway
     this.entities = this.entities.filter(e => e.id != entityId);
 
-    if (entity instanceof Spaceship) {
-      const clientIds = this.spaceshipClientIds.get(entityId);
-      this.spaceshipClientIds.delete(entityId);
-      this.actionQueueManager.removeSpaceship(entityId);
-      clientIds.forEach(id => this.clientIdSpaceships.delete(id));
-    }
-
-    return entity;
+    return null;
   }
 
-  getClientIdSpaceship(clientId: string): Spaceship {
+  getClientIdSpaceship(clientId: string): Spaceship | undefined {
     return this.clientIdSpaceships.get(clientId);
   }
 
@@ -210,7 +222,7 @@ export class GameState {
     });
   }
 
-  getActionQueue(spaceshipId: string): ActionQueue {
+  getActionQueue(spaceshipId: string): ActionQueue | undefined {
     return this.actionQueueManager.getActionQueue(spaceshipId);
   }
 
@@ -340,6 +352,9 @@ export class GameState {
     } = gameEvent;
 
     const entity = GameEntityFromData(entityData as GameEntity);
+    if (! entity) {
+      throw new Error(`could not make spawned entity from entityData: ${JSON.stringify(entityData, null, 2)}`);
+    }
 
     if (this.entitiesById.get(entity.id)) {
       /** TODO: more graceful handling of this situation, which currently is
@@ -386,9 +401,10 @@ export class GameState {
    *
    * @remarks
    * Should only be called on canonical GameState.
-   * TODO: Has LOTS of room for optimization.
+   * TODO: LOTS of room for optimization.
    */
   private detectCollisions() {
+    this.turnCollisionPairs = [];
     this.entities.forEach((checkingEntity, i) => {
       if (hasPosition(checkingEntity) && hasVelocity(checkingEntity)) {
         if (checkingEntity.movedThisTurn) {
@@ -397,9 +413,11 @@ export class GameState {
 
           // broad-phase: generate list of possible colliding entities
           const candidates = this.entities.filter((other) => {
-            if (this.turnCollisionPairs.includes([other, checkingEntity])) {
-              // exclude already-reported collisions.
-              // TODO: does this work?
+            const alreadyReported = this.turnCollisionPairs.some(([e1, e2]) => {
+              return e1.id == other.id && e2.id == checkingEntity.id;
+            });
+
+            if (alreadyReported) {
               return false;
             }
 
@@ -417,12 +435,22 @@ export class GameState {
           });
 
           candidates.forEach((cand) => {
-            // n = slower entity's path length
-            // sample faster entity's path n times
-            // does faster's path sample cross OR overlap slower's path sample?
+            /**
+             * TODO: implement!
+             * n = slower entity's path length
+             * sample faster entity's path n times
+             * does faster's path sample cross or overlap slower's path sample?
+             */
+            // For now, every possible collision is a collision! Yay!
+            this.turnCollisionPairs.push([checkingEntity, cand]);
           });
         }
       }
+    });
+  }
+
+  private processCollisions() {
+    this.turnCollisionPairs.forEach(([e1, e2]) => {
     });
   }
 
@@ -430,6 +458,8 @@ export class GameState {
     if (this.canonical) {
       this.processActionQueue();
       this.simulate();
+      this.detectCollisions();
+      this.processCollisions();
       const events = this.flushEventQueue();
       this.eventHistory.push(events);
       this.listeners.onTurnEnd?.(events);

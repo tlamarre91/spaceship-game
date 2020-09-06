@@ -34,8 +34,8 @@ export class RenderedEntity {
 
     this.boardScale = params?.boardScale  ?? 1;
 
-    this.sprite.scale.x = entity.spriteScale * (params?.scale?.x ?? 1);
-    this.sprite.scale.y = entity.spriteScale * (params?.scale?.y ?? 1);
+    this.sprite.scale.x = (entity.spriteScale ?? 1) * (params?.scale?.x ?? 1);
+    this.sprite.scale.y = (entity.spriteScale ?? 1) * (params?.scale?.y ?? 1);
 
     this.sprite.zIndex = params?.zIndex ?? 2;
 

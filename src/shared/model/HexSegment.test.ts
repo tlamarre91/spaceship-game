@@ -2,7 +2,7 @@ import { HexVector, HEX_DIRECTIONS } from "./HexVector";
 
 import { HexSegment } from "./HexSegment";
 
-describe("HexSegment intersection()", () => {
+describe("HexSegment.intersection()", () => {
   it("case 1 (y=0, x=0)", () => {
     const s1 = new HexSegment(
       HexVector.fromAxialCoordinates(-10, 0),
@@ -64,4 +64,20 @@ describe("HexSegment intersection()", () => {
 
     expect(s1.intersection(s2)).toMatchInlineSnapshot(`null`);
   });
+});
+
+describe("HexSegment.boundingBox()", () => {
+  const s = new HexSegment(
+    HexVector.fromAxialCoordinates(-10, 10),
+    HexVector.fromAxialCoordinates(10, -10)
+  );
+
+  expect(s.boundingBox()).toMatchInlineSnapshot(`
+    BoxRegion {
+      "xMax": 10,
+      "xMin": -10,
+      "yMax": 10,
+      "yMin": -10,
+    }
+  `);
 });
