@@ -110,11 +110,19 @@ describe("HexVector (randomized)", () => {
     const sum = v.plus(w);
     expect(sum.x).toBe(x0 + x1);
     expect(sum.y).toBe(y0 + y1);
-    expect(sum.z).toBe(z0 + z1);
+    expect(sum.z).toBe(z0! + z1!);
   });
 });
 
 describe("HexVector (methods)", () => {
-  it.skip("pathTo() generates a grid path between two vectors", () => {
+  it("pathTo() generates a grid path between two vectors", () => {
+    const v = HexVector.fromAxialCoordinates(5, -10);
+    const w = HexVector.fromAxialCoordinates(-5, 2);
+    const p = v.pathTo(w, true, true);
+    const p1 = v.pathTo(w, false, true);
+    const p2 = v.pathTo(w, false, false);
+    expect(p.length - p1.length).toEqual(1);
+    expect(p.length - p2.length).toEqual(2);
+    expect(p).toMatchSnapshot();
   });
 });

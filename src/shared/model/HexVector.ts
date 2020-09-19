@@ -279,8 +279,8 @@ export class HexVector {
     // hexagons as opposed to on hex edges, which can cause funky output
     const u = this.cubicRound().plus(HexVector.EPSILON_CUBIC);
     const length = this.gridDistance(v);
-    const start = includeStart ? 1 : 0;
-    const end = length - (includeEnd ? 1 : 0);
+    const start = includeStart ? 0 : 1;
+    const end = length - (includeEnd ? 0 : 1);
     for (let i = start; i < end; i += 1) {
       path.push(u.cubicLerp(v, i / length).cubicRound());
     }

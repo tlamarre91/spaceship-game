@@ -14,7 +14,7 @@ describe("HexSegment.intersection()", () => {
       HexVector.fromAxialCoordinates(0, -10)
     );
 
-    expect(s1.intersection(s2).toString()).toMatchInlineSnapshot(
+    expect(s1.intersection(s2)?.toString()).toMatchInlineSnapshot(
       `"HexVector(a, 0, 0)"`
     );
   });
@@ -30,7 +30,7 @@ describe("HexSegment.intersection()", () => {
       HexVector.fromAxialCoordinates(0, -10)
     );
 
-    expect(s1.intersection(s2).toString()).toMatchInlineSnapshot(
+    expect(s1.intersection(s2)?.toString()).toMatchInlineSnapshot(
       `"HexVector(a, 0, 0.9090909090909092)"`
     );
   });
@@ -46,7 +46,7 @@ describe("HexSegment.intersection()", () => {
       HexVector.fromAxialCoordinates(-0.0001, 11)
     );
 
-    expect(s1.intersection(s2).toString()).toMatchInlineSnapshot(
+    expect(s1.intersection(s2)?.toString()).toMatchInlineSnapshot(
       `"HexVector(a, 0, -0.8181818181818183)"`
     );
   });
