@@ -13,18 +13,15 @@ const TARGET_DIR = process.env.TARGET_DIR;
 const STATIC_DIR = process.env.STATIC_DIR;
 
 function cleanAssets() {
-  //return del(`${STATIC_DIR}/assets/*`);
   return del(path.join(STATIC_DIR, "assets", "*"));
 }
 
 function copyAssets() {
   return gulp.src(path.join("assets", "**", "*"))
-    //.pipe(gulp.dest(`${STATIC_DIR}/assets`));
     .pipe(gulp.dest(path.join(STATIC_DIR, "assets")));
 }
 
 function cleanServer() {
-  //return del([`${TARGET_DIR}/server`, `${TARGET_DIR}/shared`]);
   return del([
     path.join(TARGET_DIR, "server"),
     path.join(TARGET_DIR, "shared")
@@ -32,37 +29,28 @@ function cleanServer() {
 }
 
 function cleanClient() {
-  //return del(`${STATIC_DIR}/js/client.js`);
   return del(path.join(STATIC_DIR, "js", "client.js"));
 }
 
 function cleanTemplates() {
-  //return del(`${TARGET_DIR}/server/templates`);
   return del(path.join(TARGET_DIR, "server", "templates"));
 }
 
 function copyTemplates() {
-  //return gulp.src("src/templates/*")
-  //  .pipe(gulp.dest(`${TARGET_DIR}/templates`));
   return gulp.src(path.join("src", "templates", "*"))
     .pipe(gulp.dest(path.join(TARGET_DIR, "templates")));
 }
 
 function cleanShaders() {
-  //return del(`${STATIC_DIR}/shaders/*`);
   return del(path.join(STATIC_DIR, "shaders", "*"));
 }
 
 function copyShaders() {
-  //return gulp.src("src/shaders/*")
-  //  .pipe(gulp.dest(`${STATIC_DIR}/shaders`));
   return gulp.src(path.join("src", "shaders"))
     .pipe(gulp.dest(path.join(STATIC_DIR, "shaders")));
 }
 
 function buildServer() {
-  // gulp-typescript doesn't support sourcemaps so we have to use gulp-sourcemaps
-  // to get sourcemaps that VS Code can use in debugging
   return tsServerProj.src()
     .pipe(sourcemaps.init())
     .pipe(tsServerProj())
@@ -79,11 +67,9 @@ function buildClient() {
   // do this by checking NODE_ENV here and picking the right webpack config
   // (set mode: "production" and disable devtool: "inline-source-map")
   const webpackConfig = require("./webpack.config");
-  //return gulp.src("src/client/index.tsx")
   return gulp.src(path.join("src", "client", "index.tsx"))
     .pipe(webpack(webpackConfig, webpackCompiler))
     .pipe(gulp.dest(path.join(STATIC_DIR, "js")));
-    //.pipe(gulp.dest(`${STATIC_DIR}/js`));
 }
 
 exports.server = gulp.series(cleanServer, buildServer);
