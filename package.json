@@ -9,7 +9,8 @@
     "dev": "nodemon --enable-source-maps",
     "debug": "node --enable-source-maps --inspect .",
     "test": "jest",
-    "docker": "docker build -t tlamarre/spaceship-game ."
+    "docker": "docker build -t tlamarre/spaceship-game .",
+    "watch": "gulp watch"
   },
   "dependencies": {
     "axios": "^0.19.2",

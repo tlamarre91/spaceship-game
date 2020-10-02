@@ -76,14 +76,15 @@ export class VisualDebug {
   }
 
   renderLabeledHexagon(item: debug.LabeledHexagon, params: Partial<RenderParams> = {}): Pixi.Container {
+    // TODO: separate spritesheets by purpose. i.e. "debug", "production"
     const sprite = new Pixi.Sprite(this.resources["hexagons"].textures![item.spriteName]);
     sprite.tint = item.tint;
     sprite.alpha = item.alpha;
     sprite.scale.x = item.scale;
     sprite.scale.y = item.scale;
-    sprite.zIndex = 3;
+    sprite.zIndex = 3; // TODO: no hardcoding numbers!
     const renderedText = new Pixi.Text(item.text, this.TEXT_STYLE);
-    renderedText.zIndex = 4;
+    renderedText.zIndex = 4; // TODO: no hardcoding numbers!
     const container = new Pixi.Container();
     const pos = params?.offset ? item.position.plus(params.offset) : item.position
     const [x, y] = pos.toCartesian(this.boardScale);
