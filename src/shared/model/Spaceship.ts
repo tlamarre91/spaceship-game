@@ -9,7 +9,6 @@ import {
 import {
   GameEntity,
   GameEntityType,
-  GAME_ENTITY_TYPES,
   PlayerControlledEntity,
   PositionEntity,
   RotationEntity,
@@ -33,7 +32,7 @@ export class Spaceship implements
 {
   static DEFAULT_HP = 10;
   readonly id: string;
-  readonly entityType: GameEntityType = GAME_ENTITY_TYPES.Spaceship;
+  readonly entityType: GameEntityType = GameEntityType.Spaceship;
   playerRoleMap: Map<PlayerRole, string>;
   readonly spritesheetName: string = "ships";
   readonly spriteName?: string;
@@ -127,5 +126,5 @@ export class Spaceship implements
 }
 
 export function isSpaceship(entity?: GameEntity): entity is Spaceship {
-  return entity ? entity.entityType == GAME_ENTITY_TYPES.Spaceship : false;
+  return entity ? entity.entityType == GameEntityType.Spaceship : false;
 }

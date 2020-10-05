@@ -6,7 +6,6 @@ import { HexVector } from "./HexVector";
 import {
   GameEntity,
   GameEntityType,
-  GAME_ENTITY_TYPES,
   PositionEntity,
   RotationEntity,
   HitPointsEntity,
@@ -27,7 +26,7 @@ export class Projectile implements
   TeamEntity
 {
   readonly id: string;
-  readonly entityType: GameEntityType = GAME_ENTITY_TYPES.Projectile;
+  readonly entityType: GameEntityType = GameEntityType.Projectile;
   readonly spriteName?: string;
   readonly spriteScale?: number;
   teamId: string;
@@ -86,6 +85,6 @@ export class Projectile implements
 }
 
 export function isProjectile(entity?: GameEntity): entity is Projectile {
-  return entity ? entity.entityType == GAME_ENTITY_TYPES.Projectile : false;
+  return entity ? entity.entityType == GameEntityType.Projectile : false;
 }
 

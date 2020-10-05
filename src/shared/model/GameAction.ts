@@ -2,13 +2,18 @@ import { v4 as uuid } from "uuid";
 import { HexVector } from "./HexVector";
 import { PlayerRole } from "./types";
 
-export type ActionType =
-  "a" |
-  "s"
+//export type ActionType =
+//  "a" |
+//  "s"
+//
+//export const ACTION_TYPES: Record<string, ActionType> = {
+//  AccelerateSelf: "a",
+//  SpawnProjectile: "s"
+//}
 
-export const ACTION_TYPES: Record<string, ActionType> = {
-  AccelerateSelf: "a",
-  SpawnProjectile: "s"
+export enum ActionType {
+  AccelerateSelf = "a",
+  SpawnProjectile = "s"
 }
 
 /**
@@ -22,7 +27,7 @@ export interface GameAction {
 }
 
 export class AccelerateSelf implements GameAction {
-  readonly actionType = ACTION_TYPES.AccelerateSelf;
+  readonly actionType = ActionType.AccelerateSelf;
   readonly playerRole = "n";
   readonly actionId: string = uuid();
 
@@ -30,11 +35,11 @@ export class AccelerateSelf implements GameAction {
 }
 
 export function isAccelerateSelf(action: GameAction): action is AccelerateSelf {
-  return action.actionType == ACTION_TYPES.AccelerateSelf;
+  return action.actionType == ActionType.AccelerateSelf;
 }
 
 export class SpawnProjectile implements GameAction {
-  readonly actionType = ACTION_TYPES.SpawnProjectile;
+  readonly actionType = ActionType.SpawnProjectile;
   readonly playerRole = "w";
   readonly actionId: string = uuid();
   //readonly entityId: string;
@@ -43,5 +48,5 @@ export class SpawnProjectile implements GameAction {
 }
 
 export function isSpawnProjectile(action: GameAction): action is SpawnProjectile {
-  return action.actionType == ACTION_TYPES.SpawnProjectile;
+  return action.actionType == ActionType.SpawnProjectile;
 }

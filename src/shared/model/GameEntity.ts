@@ -21,13 +21,18 @@ import {
   isProjectile
 } from "./Projectile";
 
-export type GameEntityType =
-  "s" |
-  "p";
+//export type GameEntityType =
+//  "s" |
+//  "p";
+//
+//export const GAME_ENTITY_TYPES: Record<string, GameEntityType> = {
+//  Spaceship: "s",
+//  Projectile: "p"
+//}
 
-export const GAME_ENTITY_TYPES: Record<string, GameEntityType> = {
-  Spaceship: "s",
-  Projectile: "p"
+export enum GameEntityType {
+  Spaceship = "s",
+  Projectile = "p"
 }
 
 export interface GameEntity {

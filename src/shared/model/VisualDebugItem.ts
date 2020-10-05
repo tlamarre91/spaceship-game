@@ -1,19 +1,27 @@
 import { log } from "~shared/log";
 import { HexVector } from "./HexVector";
 
-export type VisualDebugItemType = "h" |
-  "lh" |
-  "c" |
-  "pt" |
-  "a"
+//export type VisualDebugItemType = "h" |
+//  "lh" |
+//  "c" |
+//  "pt" |
+//  "a"
+//
+//export const VISUAL_DEBUG_ITEM_TYPES: Record<string, VisualDebugItemType> = {
+//  Arrow: "a",
+//  CompositeItem: "c",
+//  Hexagon: "h",
+//  LabeledHexagon: "lh",
+//  PositionedText: "pt",
+//};
 
-export const VISUAL_DEBUG_ITEM_TYPES: Record<string, VisualDebugItemType> = {
-  Arrow: "a",
-  CompositeItem: "c",
-  Hexagon: "h",
-  LabeledHexagon: "lh",
-  PositionedText: "pt",
-};
+export enum VisualDebugItemType {
+  Arrow = "a",
+  CompositeItem = "c",
+  Hexagon = "h",
+  LabeledHexagon = "lh",
+  PositionedText = "pt",
+}
 
 export interface VisualDebugItemParams {
   alpha?: number;
@@ -58,7 +66,7 @@ export interface LabeledHexagonParams extends VisualDebugItemParams {
 }
 
 export class LabeledHexagon extends VisualDebugItem {
-  itemType = VISUAL_DEBUG_ITEM_TYPES.LabeledHexagon;
+  itemType = VisualDebugItemType.LabeledHexagon;
   snapToGrid: boolean;
   spriteName: string;
   text: string;
@@ -73,7 +81,7 @@ export class LabeledHexagon extends VisualDebugItem {
 }
 
 export function isLabeledHexagon(item: VisualDebugItem): item is LabeledHexagon {
-  return item.itemType == VISUAL_DEBUG_ITEM_TYPES.LabeledHexagon;
+  return item.itemType == VisualDebugItemType.LabeledHexagon;
 }
 
 export interface CompositeItemParams extends VisualDebugItemParams {
@@ -90,7 +98,7 @@ export interface CompositeItemParams extends VisualDebugItemParams {
  * Better not be self-referential!
  */
 export class CompositeItem extends VisualDebugItem {
-  itemType = VISUAL_DEBUG_ITEM_TYPES.CompositeItem;
+  itemType = VisualDebugItemType.CompositeItem;
   readonly components: VisualDebugItem[];
   readonly childrenInheritPosition: boolean;
   constructor(
@@ -103,7 +111,7 @@ export class CompositeItem extends VisualDebugItem {
 }
 
 export function isCompositeItem(item: VisualDebugItem): item is CompositeItem {
-  return item.itemType == VISUAL_DEBUG_ITEM_TYPES.CompositeItem;
+  return item.itemType == VisualDebugItemType.CompositeItem;
 }
 
 export interface PositionedTextParams extends VisualDebugItemParams {
@@ -112,7 +120,7 @@ export interface PositionedTextParams extends VisualDebugItemParams {
 }
 
 export class PositionedText extends VisualDebugItem {
-  itemType = VISUAL_DEBUG_ITEM_TYPES.PositionedText;
+  itemType = VisualDebugItemType.PositionedText;
   fontFamily: string;
   fontSize: number;
   constructor(
@@ -126,7 +134,7 @@ export class PositionedText extends VisualDebugItem {
 }
 
 export function isPositionedText(item: VisualDebugItem): item is PositionedText {
-  return item.itemType == VISUAL_DEBUG_ITEM_TYPES.PositionedText;
+  return item.itemType == VisualDebugItemType.PositionedText;
 }
 
 export interface ArrowParams extends VisualDebugItemParams {
@@ -135,7 +143,7 @@ export interface ArrowParams extends VisualDebugItemParams {
 }
 
 export class Arrow extends VisualDebugItem {
-  itemType = VISUAL_DEBUG_ITEM_TYPES.Arrow;
+  itemType = VisualDebugItemType.Arrow;
   start: HexVector;
   end: HexVector;
   constructor(
@@ -149,5 +157,5 @@ export class Arrow extends VisualDebugItem {
 }
 
 export function isArrow(item: VisualDebugItem): item is Arrow {
-  return item.itemType == VISUAL_DEBUG_ITEM_TYPES.Arrow;
+  return item.itemType == VisualDebugItemType.Arrow;
 }
