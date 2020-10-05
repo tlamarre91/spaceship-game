@@ -224,29 +224,29 @@ export class GameClient {
       this.components.debugDiaplay.refresh();
     }
 
-    const arrows: debug.VisualDebugItem[] = [];
+    //const arrows: debug.VisualDebugItem[] = [];
 
     HEX_DIRECTIONS.forEach((dirName, index) => {
       const dir = HexVector.direction(dirName);
       const start = dir;
       const end = dir.times(this.frame / 5);
 
-      arrows.push(new debug.Arrow({
-        start,
-        end,
-        color: 0x5555ff
-      }));
+      //arrows.push(new debug.Arrow({
+      //  start,
+      //  end,
+      //  color: 0x5555ff
+      //}));
 
-      arrows.push(new debug.Arrow({
-        start: end,
-        end: end.plus(HexVector.direction(HEX_DIRECTIONS[(index + 1) % 6]).times(this.frame / 5)),
-        color: 0xff5555
-      }));
+      //arrows.push(new debug.Arrow({
+      //  start: end,
+      //  end: end.plus(HexVector.direction(HEX_DIRECTIONS[(index + 1) % 6]).times(this.frame / 5)),
+      //  color: 0xff5555
+      //}));
     });
 
-    this.components.debugDiaplay.setVisualItem("arrows", new debug.CompositeItem({
-      components: arrows
-    }));
+    //this.components.debugDiaplay.setVisualItem("arrows", new debug.CompositeItem({
+    //  components: arrows
+    //}));
   }
 
   setupComponents() {

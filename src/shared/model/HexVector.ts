@@ -19,15 +19,15 @@ const {
 export type HexSystem = "c" | "a"; // cubic or axial
 export type HexDirection = "y-z" | "z-y" | "x-z" | "z-x" | "y-x" | "x-y";
 /**
- * array containing names of each major axis direction in the hexagonal coordinate system
+ * array of names of each major axis direction in the hexagonal coordinate system
  */
 export const HEX_DIRECTIONS: HexDirection[] = [
-  "x-z",
-  "y-z",
-  "y-x",
-  "z-y",
-  "z-x",
-  "x-y",
+  "x-z", // right
+  "y-z", // down-right
+  "y-x", // down-left
+  "z-x", // left
+  "z-y", // up-left
+  "x-y", // up-right
 ];
 
 /**
