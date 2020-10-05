@@ -34,6 +34,7 @@ function main() {
     .add("bullet", makeAssetUrl("bullet.png"))
     .add("hexagons", makeAssetUrl("hexagons.json"))
     .add("hgradient", makeAssetUrl("hgradient.png"))
+    .add("arrows", makeAssetUrl("Arrows-SmallandLarge-1.json"))
     .load((loader, resources) => {
       const myResources: Record<string, Pixi.LoaderResource> = { };
       Object.assign(myResources, resources); // TODO: this might be terrible

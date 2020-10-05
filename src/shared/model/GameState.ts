@@ -213,6 +213,10 @@ export class GameState {
     return this.clientIdSpaceships.get(clientId);
   }
 
+  getEntity(id: string): GameEntity | undefined {
+    return this.entitiesById.get(id);
+  }
+
   getEntitiesAtGrid(position: HexVector) {
     // TODO: store map of positions, and/or filtered list of positioned entities
     return this.entities.filter((e) => {

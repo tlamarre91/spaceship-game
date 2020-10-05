@@ -7,6 +7,15 @@ import { log } from "~shared/log";
 import { lerp } from "~shared/util";
 import { BoxRegion } from "./BoxRegion";
 
+const {
+  sqrt,
+  random,
+  abs,
+  round,
+  max,
+  min
+} = Math;
+
 export type HexSystem = "c" | "a"; // cubic or axial
 export type HexDirection = "y-z" | "z-y" | "x-z" | "z-x" | "y-x" | "x-y";
 /**
@@ -67,7 +76,7 @@ export class HexVector {
    * coordinates when scaled appropriately)
    */
   static fromCartesianCoordinates(x: number, y: number, scale: number = 1): HexVector {
-    const q = (Math.sqrt(3) / 3 * x - (1 / 3) * y) / scale;
+    const q = (sqrt(3) / 3 * x - (1 / 3) * y) / scale;
     const r = ((2 / 3) * y) / scale;
     return HexVector.fromAxialCoordinates(q, r);
   }
@@ -111,8 +120,8 @@ export class HexVector {
   static random({ xMin, xMax, yMin, yMax }: BoxRegion): HexVector {
     const rx = xMax - xMin;
     const ry = yMax - yMin;
-    const x = xMin + (Math.random() * rx);
-    const y = yMin + (Math.random() * ry);
+    const x = xMin + (random() * rx);
+    const y = yMin + (random() * ry);
     return HexVector.fromAxialCoordinates(x, y);
   }
 
@@ -153,7 +162,7 @@ export class HexVector {
    */
   toCartesian(scale: number = 1): [number, number] {
     const v = this.toAxial();
-    const x = scale * (Math.sqrt(3) * v.x + ((Math.sqrt(3) / 2) * v.y));
+    const x = scale * (sqrt(3) * v.x + ((sqrt(3) / 2) * v.y));
     const y = scale * 1.5 * v.y;
     return [x, y];
   }
@@ -180,13 +189,13 @@ export class HexVector {
   equals(v: HexVector): boolean {
     if (v.system == "c") {
       const { x, y, z } = this.toCubic();
-      return Math.abs(v.x - x) <= HexVector.EPSILON &&
-        Math.abs(v.y - y) <= HexVector.EPSILON &&
-        Math.abs(v.z! - z!) <= HexVector.EPSILON;
+      return abs(v.x - x) <= HexVector.EPSILON &&
+        abs(v.y - y) <= HexVector.EPSILON &&
+        abs(v.z! - z!) <= HexVector.EPSILON;
     } else {
       const { x, y } = this.toAxial();
-      return Math.abs(v.x - x) <= HexVector.EPSILON &&
-        Math.abs(v.y - y) <= HexVector.EPSILON;
+      return abs(v.x - x) <= HexVector.EPSILON &&
+        abs(v.y - y) <= HexVector.EPSILON;
     }
   }
 
@@ -234,7 +243,7 @@ export class HexVector {
   gridDistance(v: HexVector): number {
     const { x, y, z } = this.cubicRound();
     const rv = v.cubicRound();
-    return (Math.abs(x - rv.x) + Math.abs(y - rv.y) + Math.abs(z! - rv.z!)) / 2;
+    return (abs(x - rv.x) + abs(y - rv.y) + abs(z! - rv.z!)) / 2;
   }
 
   gridMagnitude(): number {
@@ -246,8 +255,8 @@ export class HexVector {
    */
   cubicRound(): HexVector {
     const { x, y, z } = this.toCubic();
-    let [rx, ry, rz] = [x, y, z].map(Math.round);
-    const [dx, dy, dz] = [Math.abs(rx - x), Math.abs(ry - y), Math.abs(rz - z!)];
+    let [rx, ry, rz] = [x, y, z].map(round);
+    const [dx, dy, dz] = [abs(rx - x), abs(ry - y), abs(rz - z!)];
     if (dx > dy && dx > dz) {
       rx = - ry - rz;
     } else if (dy > dz) {
@@ -296,7 +305,7 @@ export class HexVector {
     const results: HexVector[] = [];
     const { x, y, z } = this.toCubic();
     for (let i = -range; i <= range; i += 1) {
-      for (let j = Math.max(-range, -x - range); j < Math.min(range, -x + range); j += 1) {
+      for (let j = max(-range, -x - range); j < min(range, -x + range); j += 1) {
         const k = -i - j;
         results.push(this.plus(HexVector.fromCubicCoordinates(i, j, k)));
       }

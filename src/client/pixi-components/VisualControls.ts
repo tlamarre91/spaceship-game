@@ -1,5 +1,6 @@
 import * as Pixi from "pixi.js";
 import { log } from "~shared/log";
+import { GameClient } from "~client/GameClient";
 import {
   HexVector,
   HexDirection,
@@ -23,11 +24,13 @@ export class VisualControls {
   spaceship: Spaceship;
   config: VisualControlsConfig;
   container: Pixi.Container;
+  private client: GameClient;
+  private resources: Record<string, Pixi.LoaderResource>;
   private accelControlsContainer: Pixi.Container;
   private shootControlsContainer: Pixi.Container;
   private accelSprites: Pixi.Sprite[];
   private shootSprites: Pixi.Sprite[];
-  private resources: Record<string, Pixi.LoaderResource>;
+  private centerViewButton: Pixi.Sprite;
   private changeHandlers: ((output: VisualControlsOutput) => void)[];
 
   private acceleration: {
@@ -46,7 +49,9 @@ export class VisualControls {
 
   private decelerating: boolean = true;
 
-  constructor(resources: Record<string, Pixi.LoaderResource>, config: VisualControlsConfig) {
+  constructor(resources: Record<string, Pixi.LoaderResource>, client: GameClient, config: VisualControlsConfig) {
+    this.client = client;
+    this.resources = resources;
     this.container = new Pixi.Container();
     this.accelControlsContainer = new Pixi.Container();
     this.shootControlsContainer = new Pixi.Container();
@@ -57,7 +62,6 @@ export class VisualControls {
     this.container.interactiveChildren = true;
     this.accelControlsContainer.interactiveChildren = true;
     this.shootControlsContainer.interactiveChildren = true;
-    this.resources = resources;
     this.config = config;
     this.changeHandlers = [];
 
@@ -96,8 +100,20 @@ export class VisualControls {
       this.shootSprites.push(shootSprite);
     });
 
+    this.centerViewButton = new Pixi.Sprite(this.resources["hexagons"].textures!["hexagon-light"]);
+    this.centerViewButton.anchor.x = 0.5;
+    this.centerViewButton.anchor.y = 0.5;
+    this.centerViewButton.x = -300;
+    this.centerViewButton.scale.x = 0.3;
+    this.centerViewButton.scale.y = 0.3;
+    this.centerViewButton.interactive = true;
+    this.centerViewButton.on("mousedown", () => {
+      this.client.centerMySpaceship();
+    });
+
     this.container.addChild(this.accelControlsContainer);
     this.container.addChild(this.shootControlsContainer);
+    this.container.addChild(this.centerViewButton);
 
     this.onWindowResize();
   }

@@ -12,17 +12,19 @@ import {
 import {
   GameEntity,
   HexVector,
+  HEX_DIRECTIONS,
   GameState,
   PlayerRole
 } from "~shared/model";
 import * as net from "~shared/net";
+import * as debug from "~shared/model/VisualDebugItem";
 
 import {
   GameBoard,
   VisualClock,
   VisualControls,
   VisualControlsOutput,
-  VisualDebug
+  VisualDebugDisplay
 } from "./pixi-components";
 
 import * as action from "~shared/model/GameAction";
@@ -36,7 +38,7 @@ export interface GameClientComponents {
   board: GameBoard;
   clock: VisualClock;
   controls: VisualControls;
-  debug: VisualDebug;
+  debugDiaplay: VisualDebugDisplay;
   //entityContainer: RenderedEntityContainer;
 }
 
@@ -55,7 +57,7 @@ export class GameClient {
   averagePing: number = 0;
   private lastPingTime: number;
   private lastPongTime: number;
-  private mySpaceshipId: string;
+  mySpaceshipId: string;
 
   private readonly PING_SAMPLES = 5;
   private readonly DEBUG_PER_SECOND = 10;
@@ -92,6 +94,10 @@ export class GameClient {
     //.pinch()
     //.decelerate()
       .wheel();
+  }
+
+  centerMySpaceship() {
+    this.components.board.snapToEntity(this.mySpaceshipId);
   }
 
   setFlags(flags: Partial<GameClientFlags>) {
@@ -133,7 +139,7 @@ export class GameClient {
 
     this.lastPongTime = Date.now();
     this.averagePing = this.lastPongTime - this.lastPingTime;
-    this.components.debug.setTextEntry("ping", this.averagePing.toString());
+    this.components.debugDiaplay.setTextEntry("ping", this.averagePing.toString());
   }
 
   onInitializeGameState = (msg: net.InitializeGameState) => {
@@ -143,8 +149,8 @@ export class GameClient {
     } = msg;
 
     this.mySpaceshipId = yourShipId;
-    this.components.debug.setTextEntry("my ship id", idtrim(yourShipId));
-    this.components.board.initializeGameState(this.mySpaceshipId, entityData);
+    this.components.debugDiaplay.setTextEntry("my ship id", idtrim(yourShipId));
+    this.components.board.initializeGameState(entityData);
   }
 
   onTurnStart = (msg: net.TurnStart) => {
@@ -198,7 +204,7 @@ export class GameClient {
 
     this.viewport.addChild(bg);
     if (this.flags.debug) {
-      this.components.debug.refresh();
+      this.components.debugDiaplay.refresh();
     }
   }
 
@@ -215,10 +221,33 @@ export class GameClient {
 
     this.frame = (this.frame + 1) % 60;
     if (0 == this.frame) {
-      this.components.debug.refresh();
+      this.components.debugDiaplay.refresh();
     }
-  }
 
+    const arrows: debug.VisualDebugItem[] = [];
+
+    HEX_DIRECTIONS.forEach((dirName, index) => {
+      const dir = HexVector.direction(dirName);
+      const start = dir;
+      const end = dir.times(this.frame / 5);
+
+      arrows.push(new debug.Arrow({
+        start,
+        end,
+        color: 0x5555ff
+      }));
+
+      arrows.push(new debug.Arrow({
+        start: end,
+        end: end.plus(HexVector.direction(HEX_DIRECTIONS[(index + 1) % 6]).times(this.frame / 5)),
+        color: 0xff5555
+      }));
+    });
+
+    this.components.debugDiaplay.setVisualItem("arrows", new debug.CompositeItem({
+      components: arrows
+    }));
+  }
 
   setupComponents() {
     const boardScale = 30;
@@ -247,19 +276,19 @@ export class GameClient {
     this.components = {
       board: new GameBoard(this.resources, this.viewport, boardConfig),
       clock: new VisualClock(this.resources, clockConfig),
-      controls: new VisualControls(this.resources, controlsConfig),
-      debug: new VisualDebug(this.resources, debugConfig),
+      controls: new VisualControls(this.resources, this, controlsConfig),
+      debugDiaplay: new VisualDebugDisplay(this.resources, debugConfig),
     };
 
     this.components.controls.addHandler(this.onControlsChange);
-    this.components.debug.setTextEntry("clientId", idtrim(this.clientId));
+    this.components.debugDiaplay.setTextEntry("clientId", idtrim(this.clientId));
 
     //this.viewport.removeChildren();
     this.pixiApp.stage.addChild(this.components.clock.container);
     this.pixiApp.stage.addChild(this.components.controls.container);
-    this.pixiApp.stage.addChild(this.components.debug.renderedText);
+    this.pixiApp.stage.addChild(this.components.debugDiaplay.renderedText);
     this.viewport.addChild(this.components.board.container);
-    this.viewport.addChild(this.components.debug.viewportContainer);
+    this.viewport.addChild(this.components.debugDiaplay.viewportContainer);
   }
 
   setupSocket() {
@@ -270,7 +299,7 @@ export class GameClient {
     this.socket.on(net.GamePong.event, this.onPong);
     this.socket.on(net.TurnStart.event, this.onTurnStart);
     this.socket.on(net.TurnEnd.event, this.onTurnEnd);
-    this.socket.on( net.InitializeGameState.event, this.onInitializeGameState);
+    this.socket.on(net.InitializeGameState.event, this.onInitializeGameState);
   }
 
   start() {
@@ -278,6 +307,37 @@ export class GameClient {
     this.setupSocket();
     this.pixiApp.ticker.add(this.tick);
     //setInterval(this.sendPing, 1000);
+    this.testDebug();
+  }
+
+  testDebug() {
+    const components: debug.VisualDebugItem[] = [
+      //new debug.LabeledHexagon("butts", {
+      //  position: HexVector.ZERO,
+      //  scale: 0.5,
+      //  spriteName: "hexagon-light"
+      //}),
+      //new debug.PositionedText("BIG BUTTS", {
+      //  position: HexVector.fromAxialCoordinates(2, 3)
+      //})
+    ]
+
+    for (let i = 0; i < 10; i += 1) {
+      for (let j = 0; j < 10; j += 1) {
+        components.push(new debug.LabeledHexagon({
+          text: `(${i}, ${j})`,
+          position: HexVector.fromAxialCoordinates(i, j),
+          spriteName: "hexagon-light-outline",
+          scale: 0.1
+        }));
+      }
+    }
+
+    const compItem = new debug.CompositeItem({
+      components,
+      zIndex: 10,
+    });
+
+    this.components.debugDiaplay.setVisualItem("coordinates", compItem);
   }
 }
-

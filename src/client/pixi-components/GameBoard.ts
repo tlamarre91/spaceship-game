@@ -92,14 +92,22 @@ export class GameBoard {
     this.renderedEntityContainer.refresh();
   }
 
+  snapToEntity(id: string) {
+    const ent = this.gameState.getEntity(id);
+    if (ent && hasPosition(ent)) {
+      const [x, y] = ent.position.toCartesian(this.boardScale);
+      const snapOptions = {
+        ease: "easeInOutSine",
+        interrupt: true,
+        removeOnComplete: true
+      }
+
+      this.viewport.snap(x, y, snapOptions);
+    }
+  }
+
   onTurnEnd = (events: event.GameEvent[]) => {
     this.refresh();
-    const spaceship = this.renderedEntityContainer.getEntity(this.mySpaceshipId);
-    const { x, y } = spaceship?.sprite?.position ?? { x: 0, y: 0 };
-    const snapOptions = {
-      ease: "easeInOutSine"
-    };
-    this.viewport.snap(x, y, snapOptions);
   }
 
   onEntityMoved = (entity: GameEntity) => {
@@ -122,9 +130,8 @@ export class GameBoard {
   //  this.renderedEntityContainer.addEntity(entity);
   //}
 
-  initializeGameState(mySpaceshipId: string, entityData: object[]) {
+  initializeGameState(entityData: object[]) {
     this.renderedEntityContainer.removeAll();
-    this.mySpaceshipId = mySpaceshipId; // TODO: don't need this. add method to center view on any entity
     this.gameState = GameState.fromEntityData(entityData);
     this.gameState.entities.forEach((entity) => {
       if (hasPosition(entity) && hasRotation(entity)) {

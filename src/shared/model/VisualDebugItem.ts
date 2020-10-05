@@ -4,61 +4,81 @@ import { HexVector } from "./HexVector";
 export type VisualDebugItemType = "h" |
   "lh" |
   "c" |
-  "pt"
+  "pt" |
+  "a"
 
 export const VISUAL_DEBUG_ITEM_TYPES: Record<string, VisualDebugItemType> = {
+  Arrow: "a",
+  CompositeItem: "c",
   Hexagon: "h",
   LabeledHexagon: "lh",
-  CompositeItem: "c",
   PositionedText: "pt",
 };
+
+export interface VisualDebugItemParams {
+  alpha?: number;
+  color?: number;
+  position?: HexVector;
+  scale?: number;
+  secondaryColor?: number;
+  spriteName?: string;
+  visible?: boolean;
+  zIndex?: number;
+}
 
 /**
  * An item that should be rendered client-side by the VisualDebug component 
  */
-export interface VisualDebugItem {
-  itemType: VisualDebugItemType;
-  color: number;
-  secondaryColor?: number;
+export class VisualDebugItem {
+  readonly itemType: VisualDebugItemType;
   alpha: number;
-  scale: number;
-  visible: boolean;
-}
-
-export interface VisualDebugItemOptions {
-  alpha?: number;
-  color?: number;
-  position?: HexVector;
-  secondaryColor?: number;
-  scale?: number;
-  spriteName?: string;
-  visible?: boolean;
-}
-
-export class LabeledHexagon implements VisualDebugItem {
-  itemType = VISUAL_DEBUG_ITEM_TYPES.Hexagon;
+  color: number;
   position: HexVector;
-  alpha: number;
-  color: number;
   scale: number;
-  visible: boolean;
   secondaryColor?: number;
+  spriteName?: string;
+  visible: boolean;
+  zIndex: number;
+  constructor(params: VisualDebugItemParams) {
+    this.alpha = params.alpha ?? 1;
+    this.color = params.color ?? 0xffffff;
+    this.position = params.position ?? HexVector.ZERO;
+    this.scale = params.scale ?? 1;
+    this.secondaryColor = params.secondaryColor ?? 0xffffff;
+    this.spriteName = params.spriteName;
+    this.visible = params.visible ?? true;
+    this.zIndex = params.zIndex ?? 0;
+  }
+}
+
+export interface LabeledHexagonParams extends VisualDebugItemParams {
+  spriteName: string;
+  snapToGrid?: boolean;
+  text: string;
+}
+
+export class LabeledHexagon extends VisualDebugItem {
+  itemType = VISUAL_DEBUG_ITEM_TYPES.LabeledHexagon;
+  snapToGrid: boolean;
+  spriteName: string;
+  text: string;
+  visible: boolean;
   constructor(
-    public spriteName: string,
-    public text: string,
-    opts:  VisualDebugItemOptions = { }
+    params: LabeledHexagonParams
   ) {
-    this.visible = opts.visible ?? true;
-    this.alpha = opts.alpha ?? 1;
-    this.scale = opts.scale ?? 1;
-    this.color = opts.color ?? 0xffffff;
-    this.secondaryColor = opts.secondaryColor ?? 0xffffff;
-    this.position = opts.position ?? HexVector.ZERO;
+    super(params);
+    this.text = params.text;
+    this.snapToGrid = params.snapToGrid ?? false;
   }
 }
 
 export function isLabeledHexagon(item: VisualDebugItem): item is LabeledHexagon {
   return item.itemType == VISUAL_DEBUG_ITEM_TYPES.LabeledHexagon;
+}
+
+export interface CompositeItemParams extends VisualDebugItemParams {
+  childrenInheritPosition?: boolean;
+  components: VisualDebugItem[];
 }
 
 /**
@@ -69,31 +89,65 @@ export function isLabeledHexagon(item: VisualDebugItem): item is LabeledHexagon 
  *
  * Better not be self-referential!
  */
-export class CompositeItem implements VisualDebugItem {
+export class CompositeItem extends VisualDebugItem {
   itemType = VISUAL_DEBUG_ITEM_TYPES.CompositeItem;
+  readonly components: VisualDebugItem[];
+  readonly childrenInheritPosition: boolean;
   constructor(
-    readonly components: VisualDebugItem[],
-    readonly position: HexVector | null = null,
-    readonly childrenInheritPosition: boolean = false,
-    readonly visible: boolean,
-  ) { }
+    params: CompositeItemParams
+  ) {
+    super(params);
+    this.childrenInheritPosition = params.childrenInheritPosition ?? false;
+    this.components = params.components;
+  }
 }
 
 export function isCompositeItem(item: VisualDebugItem): item is CompositeItem {
   return item.itemType == VISUAL_DEBUG_ITEM_TYPES.CompositeItem;
 }
 
-export class PositionedText implements VisualDebugItem {
+export interface PositionedTextParams extends VisualDebugItemParams {
+  fontFamily?: string;
+  fontSize?: number;
+}
+
+export class PositionedText extends VisualDebugItem {
   itemType = VISUAL_DEBUG_ITEM_TYPES.PositionedText;
+  fontFamily: string;
+  fontSize: number;
   constructor(
-    readonly position: HexVector,
-    readonly text: string,
-    readonly alpha: number = 1,
-    readonly color: number = 0xffffff,
-    readonly scale: number = 1
-  ) { }
+    public text: string,
+    params: PositionedTextParams
+  ) {
+    super(params);
+    this.fontFamily = params.fontFamily ?? "Arial";
+    this.fontSize = params.fontSize ?? 12;
+  }
 }
 
 export function isPositionedText(item: VisualDebugItem): item is PositionedText {
-  return item.itemType == VISUAL_DEBUG_ITEM_TYPES.FloatingText;
+  return item.itemType == VISUAL_DEBUG_ITEM_TYPES.PositionedText;
+}
+
+export interface ArrowParams extends VisualDebugItemParams {
+  start: HexVector;
+  end: HexVector;
+}
+
+export class Arrow extends VisualDebugItem {
+  itemType = VISUAL_DEBUG_ITEM_TYPES.Arrow;
+  start: HexVector;
+  end: HexVector;
+  constructor(
+    params: ArrowParams
+  ) {
+    super(params);
+    this.start = params.start;
+    this.end = params.end;
+    this.position = this.start;
+  }
+}
+
+export function isArrow(item: VisualDebugItem): item is Arrow {
+  return item.itemType == VISUAL_DEBUG_ITEM_TYPES.Arrow;
 }

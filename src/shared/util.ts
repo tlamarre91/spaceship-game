@@ -27,3 +27,7 @@ export function idtrim(uuid: string): string {
 export function increasingSortFn(a: number, b: number): number {
   return a - b;
 }
+
+export function rad2deg(x: number): number {
+  return x * (180 / Math.PI);
+}
