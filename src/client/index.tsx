@@ -38,6 +38,7 @@ function main() {
     .load((loader, resources) => {
       const myResources: Record<string, Pixi.LoaderResource> = { };
       Object.assign(myResources, resources); // TODO: this might be terrible
+
       const client = new GameClient(pixiApp, loader, myResources);
       client.start();
 
