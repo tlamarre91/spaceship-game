@@ -3,18 +3,10 @@
  * Uses immutable data structures for hexagonal vectors
  */
 
-import { log } from "~shared/log";
-import { lerp } from "~shared/util";
+import { lerp, rowMajorIndex } from "./util";
 import { BoxRegion } from "./BoxRegion";
 
-const {
-  sqrt,
-  random,
-  abs,
-  round,
-  max,
-  min
-} = Math;
+const { sqrt, random, abs, round, max, min } = Math;
 
 export type HexSystem = "c" | "a"; // cubic or axial
 export type HexDirection = "y-z" | "z-y" | "x-z" | "z-x" | "y-x" | "x-y";
@@ -47,7 +39,12 @@ export class HexVector {
   readonly z: number | null;
   readonly system: HexSystem;
 
-  constructor(system: HexSystem, x: number, y: number, z: (number | null) = null) {
+  constructor(
+    system: HexSystem,
+    x: number,
+    y: number,
+    z: number | null = null
+  ) {
     if (system == "c") {
       if (z == null) {
         throw new Error("cubic coordinates need z component");
@@ -75,8 +72,12 @@ export class HexVector {
    * get HexVector from cartesian coordinates (i.e. pixel
    * coordinates when scaled appropriately)
    */
-  static fromCartesianCoordinates(x: number, y: number, scale: number = 1): HexVector {
-    const q = (sqrt(3) / 3 * x - (1 / 3) * y) / scale;
+  static fromCartesianCoordinates(
+    x: number,
+    y: number,
+    scale: number = 1
+  ): HexVector {
+    const q = ((sqrt(3) / 3) * x - (1 / 3) * y) / scale;
     const r = ((2 / 3) * y) / scale;
     return HexVector.fromAxialCoordinates(q, r);
   }
@@ -120,8 +121,8 @@ export class HexVector {
   static random({ xMin, xMax, yMin, yMax }: BoxRegion): HexVector {
     const rx = xMax - xMin;
     const ry = yMax - yMin;
-    const x = xMin + (random() * rx);
-    const y = yMin + (random() * ry);
+    const x = xMin + random() * rx;
+    const y = yMin + random() * ry;
     return HexVector.fromAxialCoordinates(x, y);
   }
 
@@ -133,19 +134,24 @@ export class HexVector {
    * @param xBasis - basis vector generating first element of each row
    * @param yBasis - basis vector generating each row from first element
    */
-  static tile2D(xCount: number, yCount: number, xBasis: HexVector, yBasis: HexVector): HexVector[][] {
-    const result: HexVector[][] = [];
+  static tile2D(
+    xCount: number,
+    yCount: number,
+    xBasis: HexVector,
+    yBasis: HexVector
+  ): HexVector[] {
+    const resultLength = xCount * yCount;
+    const tiles: HexVector[] = new Array<HexVector>(resultLength);
     for (let i = 0; i < xCount; i += 1) {
-      const first = xBasis.times(i);
-      const row: HexVector[] = [first];
-      for (let j = 1; j < yCount; j += 1) {
-        row.push(first.plus(yBasis.times(j)));
+      for (let j = 0; j < yCount; j += 1) {
+        //const tileIndex = i * yCount + j; // TODO: I think this is wrong.
+        const tileIndex = rowMajorIndex(i, j, yCount);
+        const newTile = xBasis.times(i).plus(yBasis.times(j));
+        tiles[tileIndex] = newTile;
       }
-
-      result.push(row);
     }
 
-    return result;
+    return tiles;
   }
 
   toString(): string {
@@ -162,7 +168,7 @@ export class HexVector {
    */
   toCartesian(scale: number = 1): [number, number] {
     const v = this.toAxial();
-    const x = scale * (sqrt(3) * v.x + ((sqrt(3) / 2) * v.y));
+    const x = scale * (sqrt(3) * v.x + (sqrt(3) / 2) * v.y);
     const y = scale * 1.5 * v.y;
     return [x, y];
   }
@@ -173,7 +179,7 @@ export class HexVector {
     } else {
       const x = this.x;
       const y = this.y;
-      const z = - x - y;
+      const z = -x - y;
       return new HexVector("c", x, y, z);
     }
   }
@@ -189,13 +195,16 @@ export class HexVector {
   equals(v: HexVector): boolean {
     if (v.system == "c") {
       const { x, y, z } = this.toCubic();
-      return abs(v.x - x) <= HexVector.EPSILON &&
+      return (
+        abs(v.x - x) <= HexVector.EPSILON &&
         abs(v.y - y) <= HexVector.EPSILON &&
-        abs(v.z! - z!) <= HexVector.EPSILON;
+        abs(v.z! - z!) <= HexVector.EPSILON
+      );
     } else {
       const { x, y } = this.toAxial();
-      return abs(v.x - x) <= HexVector.EPSILON &&
-        abs(v.y - y) <= HexVector.EPSILON;
+      return (
+        abs(v.x - x) <= HexVector.EPSILON && abs(v.y - y) <= HexVector.EPSILON
+      );
     }
   }
 
@@ -204,7 +213,7 @@ export class HexVector {
       const { x, y, z } = this.toCubic();
       return HexVector.fromCubicCoordinates(x + v.x, y + v.y, z! + v.z!);
     } else {
-      const {x, y} = this.toAxial();
+      const { x, y } = this.toAxial();
       return HexVector.fromAxialCoordinates(x + v.x, y + v.y);
     }
   }
@@ -222,7 +231,11 @@ export class HexVector {
   times(scalar: number): HexVector {
     if (this.system == "c") {
       const { x, y, z } = this;
-      return HexVector.fromCubicCoordinates(x * scalar, y * scalar, z! * scalar);
+      return HexVector.fromCubicCoordinates(
+        x * scalar,
+        y * scalar,
+        z! * scalar
+      );
     } else {
       const { x, y } = this;
       return HexVector.fromAxialCoordinates(x * scalar, y * scalar);
@@ -237,7 +250,7 @@ export class HexVector {
       HexVector.direction("z-x"),
       HexVector.direction("z-y"),
       HexVector.direction("y-z"),
-    ].map(v => v.plus(this));
+    ].map((v) => v.plus(this));
   }
 
   gridDistance(v: HexVector): number {
@@ -258,11 +271,11 @@ export class HexVector {
     let [rx, ry, rz] = [x, y, z].map(round);
     const [dx, dy, dz] = [abs(rx - x), abs(ry - y), abs(rz - z!)];
     if (dx > dy && dx > dz) {
-      rx = - ry - rz;
+      rx = -ry - rz;
     } else if (dy > dz) {
-      ry = - rx - rz;
+      ry = -rx - rz;
     } else {
-      rz = - rx - ry;
+      rz = -rx - ry;
     }
 
     return HexVector.fromCubicCoordinates(rx, ry, rz);
@@ -282,7 +295,11 @@ export class HexVector {
     );
   }
 
-  pathTo(v: HexVector, includeStart?: boolean, includeEnd?: boolean): HexVector[] {
+  pathTo(
+    v: HexVector,
+    includeStart?: boolean,
+    includeEnd?: boolean
+  ): HexVector[] {
     const path: HexVector[] = [];
     // round this vector to lattice, then offset by a tiny vector to make path lie inside
     // hexagons as opposed to on hex edges, which can cause funky output
@@ -305,7 +322,11 @@ export class HexVector {
     const results: HexVector[] = [];
     const { x, y, z } = this.toCubic();
     for (let i = -range; i <= range; i += 1) {
-      for (let j = max(-range, -x - range); j < min(range, -x + range); j += 1) {
+      for (
+        let j = max(-range, -x - range);
+        j < min(range, -x + range);
+        j += 1
+      ) {
         const k = -i - j;
         results.push(this.plus(HexVector.fromCubicCoordinates(i, j, k)));
       }
