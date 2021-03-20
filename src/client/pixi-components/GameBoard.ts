@@ -3,6 +3,9 @@ import { Viewport } from "pixi-viewport";
 
 import { log } from "~shared/log";
 import {
+  rowColumnFromIndex
+} from "~shared/util";
+import {
   GameEntity,
   GameState,
   HexVector,
@@ -28,8 +31,10 @@ export class GameBoard {
   private resources: Record<string, Pixi.LoaderResource>;
   private origin: { x: number, y: number };
   private boardScale: number;
+  height: number = 20;
+  width: number = 20;
   private textures: { [name: string]: Pixi.Texture };
-  private tileSprites: Pixi.Sprite[][];
+  private tileSprites: Pixi.Sprite[];
   private renderedEntityContainer: RenderedEntityContainer;
   private mySpaceshipId: string;
 
@@ -54,8 +59,8 @@ export class GameBoard {
     };
 
     const tiles = HexVector.tile2D(
-      20, // TODO: factor out tilesWidth, tilesHeight
-      20, 
+      this.height,
+      this.width, 
       HexVector.direction("x-z").times(this.boardScale),
       HexVector.direction("y-z").times(this.boardScale)
     );
@@ -72,7 +77,7 @@ export class GameBoard {
     //this.container.y = -300;
     this.container.addChild(this.renderedEntityContainer.container);
 
-    this.tileSprites = tiles.map((row, i) => row.map((tile, j) => {
+    this.tileSprites = tiles.map((tile) => {
       const [x, y] = tile.toCartesian(1);
       const sprite = new Pixi.Sprite(this.textures["hexagon-dark"]);
       sprite.x = x;
@@ -82,10 +87,11 @@ export class GameBoard {
       sprite.anchor.x = 0.5;
       sprite.anchor.y = 0.5;
       sprite.zIndex = 0;
+      sprite.on("click", () => { console.log([x, y]) });
       //sprite.visible = false; // TODO: AAAAHHHH!
       this.container.addChild(sprite);
       return sprite;
-    }));
+    });
   }
 
   refresh() {
@@ -149,14 +155,22 @@ export class GameBoard {
   }
 
   highlightHex(x: number, y: number) {
-    this.tileSprites.forEach((row, i) => {
-      row.forEach((sprite, j) => {
-        if (! (j == x && i == y)) {
-          sprite.texture = this.textures["hexagon-dark"];
-        } else {
-          sprite.texture = this.textures["hexagon"];
-        }
-      });
+    this.tileSprites.forEach((sprite, index) => {
+      const [row, col] = rowColumnFromIndex(index, this.width);
+      if (col == x && row == y) {
+        sprite.texture = this.textures["hexagon"];
+      } else {
+        sprite.texture = this.textures["hexagon-dark"];
+      }
     });
+    //this.tileSprites.forEach((row, i) => {
+    //  row.forEach((sprite, j) => {
+    //    if (! (j == x && i == y)) {
+    //      sprite.texture = this.textures["hexagon-dark"];
+    //    } else {
+    //      sprite.texture = this.textures["hexagon"];
+    //    }
+    //  });
+    //});
   }
 }

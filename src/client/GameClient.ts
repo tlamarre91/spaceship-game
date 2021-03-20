@@ -1,5 +1,5 @@
 import { v4 as uuid } from "uuid";
-import io from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import * as Pixi from "pixi.js";
 import { Viewport } from "pixi-viewport";
 
@@ -17,14 +17,14 @@ import {
   PlayerRole
 } from "~shared/model";
 import * as net from "~shared/net";
-import * as debug from "~shared/model/VisualDebugItem";
+import * as debug from "~shared/model/DebugItem";
 
 import {
   GameBoard,
-  VisualClock,
-  VisualControls,
-  VisualControlsOutput,
-  VisualDebugDisplay
+  TurnClock,
+  Controls,
+  ControlsOutput,
+  DebugDisplay
 } from "./pixi-components";
 
 import * as action from "~shared/model/GameAction";
@@ -36,16 +36,18 @@ export interface GameClientFlags {
 
 export interface GameClientComponents {
   board: GameBoard;
-  clock: VisualClock;
-  controls: VisualControls;
-  debugDiaplay: VisualDebugDisplay;
+  clock: TurnClock;
+  controls: Controls;
+  debugDiaplay: DebugDisplay;
   //entityContainer: RenderedEntityContainer;
 }
 
 export class GameClient {
   clientId: string;
   pixiApp: Pixi.Application;
-  private socket: SocketIOClient.Socket = {} as SocketIOClient.Socket;
+  //private socket: Socket = {} as Socket;
+  private socket: Socket;
+
   private loader: Pixi.Loader;
   private resources: Record<string, Pixi.LoaderResource>;
   private viewport: Viewport;
@@ -129,14 +131,6 @@ export class GameClient {
   };
 
   onPong = () => {
-    //this.lastPongTime = Date.now();
-    //const p = this.lastPongTime - this.lastPingTime;
-    //if (this.averagePing != 0) {
-    //  this.averagePing = (((this.PING_SAMPLES - 1) * this.averagePing) + p) / this.PING_SAMPLES
-    //} else {
-    //  this.averagePing = p;
-    //}
-
     this.lastPongTime = Date.now();
     this.averagePing = this.lastPongTime - this.lastPingTime;
     this.components.debugDiaplay.setTextEntry("ping", this.averagePing.toString());
@@ -162,7 +156,7 @@ export class GameClient {
   //  this.sendActionQueues();
   //}
 
-  onControlsChange = (output: VisualControlsOutput) => {
+  onControlsChange = (output: ControlsOutput) => {
     log.info("ONCHANGE");
     clearTimeout(this.sendActionsTimeout);
     this.sendActionsTimeout = setTimeout(this.sendActionQueues, this.CONTROLS_TIMEOUT);
@@ -224,7 +218,7 @@ export class GameClient {
       this.components.debugDiaplay.refresh();
     }
 
-    //const arrows: debug.VisualDebugItem[] = [];
+    //const arrows: debug.DebugItem[] = [];
 
     HEX_DIRECTIONS.forEach((dirName, index) => {
       const dir = HexVector.direction(dirName);
@@ -244,7 +238,7 @@ export class GameClient {
       //}));
     });
 
-    //this.components.debugDiaplay.setVisualItem("arrows", new debug.CompositeItem({
+    //this.components.debugDiaplay.setItem("arrows", new debug.CompositeItem({
     //  components: arrows
     //}));
   }
@@ -275,9 +269,9 @@ export class GameClient {
 
     this.components = {
       board: new GameBoard(this.resources, this.viewport, boardConfig),
-      clock: new VisualClock(this.resources, clockConfig),
-      controls: new VisualControls(this.resources, this, controlsConfig),
-      debugDiaplay: new VisualDebugDisplay(this.resources, debugConfig),
+      clock: new TurnClock(this.resources, clockConfig),
+      controls: new Controls(this.resources, this, controlsConfig),
+      debugDiaplay: new DebugDisplay(this.resources, debugConfig),
     };
 
     this.components.controls.addHandler(this.onControlsChange);
@@ -292,8 +286,7 @@ export class GameClient {
   }
 
   setupSocket() {
-    //this.socket = io("http://localhost:3000");
-    this.socket = io();
+    this.socket = io("http://localhost:3000"); // arg can be omitted to use window.location
     this.socket.on("connect", this.onConnect);
     //this.socket.on(net.TurnWarn.event, this.onTurnWarn);
     this.socket.on(net.GamePong.event, this.onPong);
@@ -311,7 +304,7 @@ export class GameClient {
   }
 
   testDebug() {
-    const components: debug.VisualDebugItem[] = [
+    const components: debug.DebugItem[] = [
       //new debug.LabeledHexagon("butts", {
       //  position: HexVector.ZERO,
       //  scale: 0.5,
@@ -338,6 +331,6 @@ export class GameClient {
       zIndex: 10,
     });
 
-    this.components.debugDiaplay.setVisualItem("coordinates", compItem);
+    this.components.debugDiaplay.setItem("coordinates", compItem);
   }
 }

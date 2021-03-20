@@ -10,19 +10,19 @@ import {
   AccelerateSelf
 } from "~shared/model";
 
-export interface VisualControlsConfig {
+export interface ControlsConfig {
   maxAcceleration: number;
 }
 
-export interface VisualControlsOutput {
+export interface ControlsOutput {
   acceleration?: HexVector;
   shooting?: HexVector;
 }
 
-export class VisualControls {
+export class Controls {
   // TODO: this WHOLE class is placeholder crap
   spaceship: Spaceship;
-  config: VisualControlsConfig;
+  config: ControlsConfig;
   container: Pixi.Container;
   private client: GameClient;
   private resources: Record<string, Pixi.LoaderResource>;
@@ -31,7 +31,7 @@ export class VisualControls {
   private accelSprites: Pixi.Sprite[];
   private shootSprites: Pixi.Sprite[];
   private centerViewButton: Pixi.Sprite;
-  private changeHandlers: ((output: VisualControlsOutput) => void)[];
+  private changeHandlers: ((output: ControlsOutput) => void)[];
 
   private acceleration: {
     direction: HexDirection,
@@ -49,7 +49,7 @@ export class VisualControls {
 
   private decelerating: boolean = true;
 
-  constructor(resources: Record<string, Pixi.LoaderResource>, client: GameClient, config: VisualControlsConfig) {
+  constructor(resources: Record<string, Pixi.LoaderResource>, client: GameClient, config: ControlsConfig) {
     this.client = client;
     this.resources = resources;
     this.container = new Pixi.Container();
@@ -118,7 +118,7 @@ export class VisualControls {
     this.onWindowResize();
   }
 
-  addHandler(handler: ((output: VisualControlsOutput) => void)) {
+  addHandler(handler: ((output: ControlsOutput) => void)) {
     this.changeHandlers.push(handler);
   }
 
@@ -133,7 +133,7 @@ export class VisualControls {
     });
   }
 
-  getOutput(): VisualControlsOutput {
+  getOutput(): ControlsOutput {
     let acceleration: HexVector;
     if (this.decelerating && this.spaceship) {
       // TODO: revise to produce more "natural" deceleration paths

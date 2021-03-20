@@ -3,7 +3,7 @@
  * Uses immutable data structures for hexagonal vectors
  */
 
-import { lerp, rowMajorIndex } from "./util";
+import { lerp, rowMajorIndex } from "~shared/util";
 import { BoxRegion } from "./BoxRegion";
 
 const { sqrt, random, abs, round, max, min } = Math;

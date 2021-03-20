@@ -31,3 +31,30 @@ export function increasingSortFn(a: number, b: number): number {
 export function rad2deg(x: number): number {
   return x * (180 / Math.PI);
 }
+
+export function circularPush<T>(a: T[], item: T, maxLength: number): T[] {
+  a.push(item);
+  if (a.length > maxLength) {
+    return a.slice(1);
+  } else {
+    return a.slice();
+  }
+}
+
+export function randInt(max: number) {
+  return Math.floor(Math.random() * max);
+}
+
+export function rowMajorIndex(
+  row: number,
+  column: number,
+  width: number
+): number {
+  return row * width + column;
+}
+
+export function rowColumnFromIndex(index: number, width: number): [number, number] {
+  const row = Math.floor(index / width);
+  const col = index % width;
+  return [row, col];
+}

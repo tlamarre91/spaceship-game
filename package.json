@@ -4,13 +4,15 @@
   "main": "dist/server/index.js",
   "license": "MIT",
   "scripts": {
+    "build": "gulp",
+    "clean": "gulp clean",
     "prestart": "gulp",
     "server": "node --enable-source-maps .",
     "dev": "nodemon --enable-source-maps",
     "debug": "node --enable-source-maps --inspect .",
     "test": "jest",
     "docker": "docker build -t tlamarre/spaceship-game .",
-    "watch": "gulp watch"
+    "build-watch": "gulp watch"
   },
   "dependencies": {
     "axios": "^0.19.2",
@@ -25,8 +27,8 @@
     "pug": "^3.0.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "socket.io": "^2.3.0",
-    "socket.io-client": "^2.3.0",
+    "socket.io": "^3.1.1",
+    "socket.io-client": "^3.1.1",
     "uuid": "^8.3.0",
     "winston": "^3.3.3"
   },
@@ -37,8 +39,6 @@
     "@types/matter-js": "^0.14.5",
     "@types/react": "^16.9.44",
     "@types/react-dom": "^16.9.8",
-    "@types/socket.io": "^2.1.10",
-    "@types/socket.io-client": "^1.4.33",
     "@types/uuid": "^8.0.1",
     "del": "^5.1.0",
     "gulp": "^4.0.2",

@@ -1,7 +1,7 @@
 import * as Pixi from "pixi.js";
 import { log } from "~shared/log";
 
-export interface VisualClockConfig {
+export interface TurnClockConfig {
   maxTimeMs: number;
   //width: number;
   height: number;
@@ -10,7 +10,7 @@ export interface VisualClockConfig {
 /**
  * Displays a decreasing progress bar to visualize remaining turn time
  */
-export class VisualClock {
+export class TurnClock {
   container: Pixi.Container;
   barSprite: Pixi.Sprite;
   private resources: Record<string, Pixi.LoaderResource>;
@@ -20,7 +20,7 @@ export class VisualClock {
   private y: number;
   private startTime: number;
 
-  constructor(resources: Record<string, Pixi.LoaderResource>, config: VisualClockConfig) {
+  constructor(resources: Record<string, Pixi.LoaderResource>, config: TurnClockConfig) {
     this.maxTimeMs = config.maxTimeMs;
     this.width = window.innerWidth;
     this.height = config.height;

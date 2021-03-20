@@ -102,10 +102,6 @@ export class GameState {
   private eventQueue: event.GameEvent[] = [];
   private turnCollisionPairs: [GameEntity, GameEntity][] = [];
 
-  /**
-   * List of items comprising a current debugging view of the GameState
-   */
-  //public debugItems: VisualDebugItem[];
   actionHistory: action.GameAction[][] = [];
   eventHistory: event.GameEvent[][] = [];
   listeners: GameStateListeners = {};

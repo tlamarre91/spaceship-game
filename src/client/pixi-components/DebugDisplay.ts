@@ -3,7 +3,7 @@ import { Viewport } from "pixi-viewport";
 
 import { log } from "~shared/log";
 import { rad2deg } from "~shared/util";
-import * as debug from "~shared/model/VisualDebugItem";
+import * as debug from "~shared/model/DebugItem";
 import {
   HexVector,
   HexSegment
@@ -11,11 +11,11 @@ import {
 
 const { PI, sqrt, abs, acos } = Math;
 
-export interface VisualDebugDisplayConfig {
+export interface DebugDisplayConfig {
   boardScale: number;
 }
 
-export class VisualDebugDisplay {
+export class DebugDisplay {
   private resources: Record<string, Pixi.LoaderResource>;
   //viewport: Viewport;
   private TEXT_STYLE = {
@@ -29,7 +29,7 @@ export class VisualDebugDisplay {
   private renderedItems: Map<string, Pixi.DisplayObject> = new Map();
   private boardScale: number;
 
-  constructor(resources: Record<string, Pixi.LoaderResource>, config: VisualDebugDisplayConfig) {
+  constructor(resources: Record<string, Pixi.LoaderResource>, config: DebugDisplayConfig) {
     this.resources = resources;
     this.boardScale = config.boardScale;
     this.viewportContainer = new Pixi.Container();
@@ -44,7 +44,7 @@ export class VisualDebugDisplay {
     this.textEntries.delete(key);
   }
 
-  setVisualItem(key: string, item: debug.VisualDebugItem) {
+  setItem(key: string, item: debug.DebugItem) {
     const currentItem = this.renderedItems.get(key);
     if (currentItem) {
       this.viewportContainer.removeChild(currentItem);
@@ -56,7 +56,7 @@ export class VisualDebugDisplay {
     }
   }
 
-  removeVisualItem(key: string) {
+  removeItem(key: string) {
     const currentItem = this.renderedItems.get(key);
     if (currentItem) {
       this.viewportContainer.removeChild(currentItem);
@@ -180,7 +180,7 @@ export class VisualDebugDisplay {
     return container;
   }
 
-  renderItem(item: debug.VisualDebugItem): Pixi.DisplayObject | undefined {
+  renderItem(item: debug.DebugItem): Pixi.DisplayObject | undefined {
     if (debug.isLabeledHexagon(item)) {
       return this.renderLabeledHexagon(item);
     } else if (debug.isCompositeItem(item)) {
@@ -190,7 +190,7 @@ export class VisualDebugDisplay {
     } else if (debug.isArrow(item)) {
       return this.renderArrow(item);
     } else {
-      log.error(`VisualDebug.renderItem: don't know how to render type ${item.itemType}`);
+      log.error(`DebugDisplay.renderItem: don't know how to render type ${item.itemType}`);
       return undefined;
     }
   }
@@ -204,7 +204,7 @@ export class VisualDebugDisplay {
 
       this.renderedText.text = strings.join("\n");
     } catch (err) {
-      log.error(`VisualDebug.refresh: ${err}`);
+      log.error(`DebugDisplay.refresh: ${err}`);
     }
   }
 }

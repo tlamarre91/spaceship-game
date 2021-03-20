@@ -116,7 +116,7 @@ export class GameServer {
   }
 
   private turnWarnCallback = () => {
-    log.info("turnWarnCallback");
+    //log.info("turnWarnCallback");
     try {
       this.emitToAll(net.TurnWarn.event, new net.TurnWarn(this.turnLength - this.warnTurnEnd));
     } catch (err) {
@@ -130,7 +130,7 @@ export class GameServer {
 
   private turnEndCallback = (events: event.GameEvent[]) => {
     try {
-      log.info(`turnEndCallback events: ${JSON.stringify(events, null, 2)}`);
+      //log.info(`turnEndCallback events: ${JSON.stringify(events, null, 2)}`);
       this.emitToAll(net.TurnEnd.event, new net.TurnEnd(events));
       clearTimeout(this.turnHangingTimeout);
     } catch (err) {
@@ -155,16 +155,14 @@ export class GameServer {
       log.info("game server listening");
     });
 
-    this.io.on("connect", (socket: socketio.Socket) => {
+    this.io.on("connect", (socket: socketio.Socket) => { // TODO: is it on("connection", ...) now?
       log.info(`client connected on port ${this.port}`);
 
-      socket.use((_, next) => {
-        this.trackSocket(socket.id)
-        next(null);
+      socket.onAny(() => {
+        this.trackSocket(socket.id);
       });
 
       socket.on(net.Join.event, (msg: net.Join) => {
-        log.info("ONJOIN!!");
         let existingSocket = this.socketClientMap.getClientSocket(msg.clientId);
         if (existingSocket) {
           log.error(`re-joining not yet implemented (clientId: ${msg.clientId.slice(-8)})`);
@@ -219,7 +217,10 @@ export class GameServer {
 
   public start() {
     this.turnNumber = 0;
-    this.io = socketio.listen(this.httpServer, { origins: "*:*" });
+    // TODO: figure out what params to pass to Server()
+    //this.io = new socketio.Server(this.httpServer, { cors: { origins : "*:*" } });
+    this.io = new socketio.Server(this.httpServer, { });
+    //this.io = socketio.listen(this.httpServer, { origins: "*:*" });
     this.listen();
     this.gameState = new GameState(true);
     this.gameState.listeners.onTurnEnd = this.turnEndCallback;
@@ -234,7 +235,7 @@ export class GameServer {
     if (spaceship) {
       this.gameState.removeEntity(spaceship);
     } else {
-      // TODO: warn or something?
+      log.warn(`removePlayer: ${spaceship}`); // TODO: better message
     }
   }
 
@@ -296,7 +297,7 @@ export class GameServer {
 
     try {
       const spaceship = this.gameState.getClientIdSpaceship(clientId);
-      log.info(`onSetMultipleActionQueues: ${JSON.stringify(msg, null, 2)}`);
+      //log.info(`onSetMultipleActionQueues: ${JSON.stringify(msg, null, 2)}`);
 
       if (spaceship) {
         roleActionTuples.forEach(([role, actions]) => {
