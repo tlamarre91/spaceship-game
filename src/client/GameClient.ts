@@ -55,7 +55,7 @@ export class GameClient {
   private headless: boolean;
   private gameState: GameState;
   private loader: Pixi.Loader;
-  private resources: Record<string, Pixi.LoaderResource>;
+  private resources: Record<string, Pixi.ILoaderResource>;
   private viewport: Viewport;
   private flags: GameClientFlags = {
     paused: false,
@@ -76,7 +76,7 @@ export class GameClient {
   constructor(
     pixiApp?: Pixi.Application,
     loader?: Pixi.Loader,
-    resources?: Record<string, Pixi.LoaderResource>
+    resources?: Record<string, Pixi.ILoaderResource>
   ) {
     this.clientId = uuid();
     log.info(`initializing client ${idtrim(this.clientId)}`);
@@ -106,7 +106,7 @@ export class GameClient {
         .wheel();
     } else {
       this.headless = true;
-      log.info("initializing headless client");
+      //log.info("initializing headless client");
     }
   }
 
@@ -183,7 +183,7 @@ export class GameClient {
   //}
 
   onControlsChange = (output: ControlsOutput) => {
-    log.info("ONCHANGE");
+    //log.info("ONCHANGE");
     clearTimeout(this.sendActionsTimeout);
     this.sendActionsTimeout = setTimeout(this.sendActionQueues, this.CONTROLS_TIMEOUT);
   }
@@ -212,7 +212,7 @@ export class GameClient {
       roleActionTuples.push(["w", [shoot]]);
     }
     const msg = new net.SetMultipleActionQueues(roleActionTuples);
-    log.info(`sending action queues: ${JSON.stringify(msg, null, 2)}`);
+    //log.info(`sending action queues: ${JSON.stringify(msg, null, 2)}`);
     this.socket.emit(net.SetMultipleActionQueues.event, msg);
   }
 
@@ -359,5 +359,9 @@ export class GameClient {
     });
 
     this.components?.debugDiaplay.setItem("coordinates", compItem);
+  }
+
+  addEventHandler(event: string, handler: (msg: net.Message) => void) {
+    this.socket.on(event, handler);
   }
 }

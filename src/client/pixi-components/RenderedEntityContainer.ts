@@ -16,11 +16,11 @@ export interface RenderedEntityContainerConfig {
 
 export class RenderedEntityContainer {
   container: Pixi.Container;
-  private resources: Record<string, Pixi.LoaderResource>;
+  private resources: Record<string, Pixi.ILoaderResource>;
   private renderedEntitiesById: Map<string, RenderedEntity>;
   private boardScale: number;
 
-  constructor(resources: Record<string, Pixi.LoaderResource>, config: RenderedEntityContainerConfig) {
+  constructor(resources: Record<string, Pixi.ILoaderResource>, config: RenderedEntityContainerConfig) {
     this.boardScale = config?.boardScale ?? 1;
     this.container = new Pixi.Container();
     this.container.sortableChildren = true;
@@ -39,7 +39,7 @@ export class RenderedEntityContainer {
       if (entity.spritesheetName) {
         texture = this.resources[entity.spritesheetName].textures![entity.spriteName];
       } else {
-        texture = this.resources[entity.spriteName].texture;
+        texture = this.resources[entity.spriteName].texture!; // TODO: can i use ! here?
       }
     } else {
       throw new Error(`tried to render entity ${idtrim(entity.id)} with no spriteName`);

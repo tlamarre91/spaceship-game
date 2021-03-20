@@ -4,9 +4,9 @@ dotenv.config();
 module.exports = {
   mode: process.env.NODE_ENV,
   //mode: "production",
-  node: {
-    fs: "empty"
-  },
+  //node: {
+  //  fs: "empty"
+  //},
   entry: "./src/admin-client/index.tsx",
   devtool: "inline-source-map",
   module: {
@@ -19,6 +19,14 @@ module.exports = {
   },
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".jsx"],
+    fallback: {
+      os: false,
+      fs: false,
+      path: false,
+      zlib: false,
+      http: false,
+      https: false
+    },
     alias: {
       "~shared": path.resolve("src/shared"),
       "~client": path.resolve("src/client"),

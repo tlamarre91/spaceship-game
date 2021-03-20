@@ -99,4 +99,14 @@ exports.watch = (cb) => {
   cb();
 }
 
-exports.default = gulp.series(exports.clean, gulp.parallel(buildServer, buildClient, copyTemplates, copyShaders, copyAssets));
+exports.default = gulp.series(
+  exports.clean,
+  gulp.parallel(
+    buildServer,
+    buildClient,
+    buildAdminClient,
+    copyTemplates,
+    copyShaders,
+    copyAssets
+  )
+);

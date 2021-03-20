@@ -25,7 +25,7 @@ export class Controls {
   config: ControlsConfig;
   container: Pixi.Container;
   private client: GameClient;
-  private resources: Record<string, Pixi.LoaderResource>;
+  private resources: Record<string, Pixi.ILoaderResource>;
   private accelControlsContainer: Pixi.Container;
   private shootControlsContainer: Pixi.Container;
   private accelSprites: Pixi.Sprite[];
@@ -49,7 +49,7 @@ export class Controls {
 
   private decelerating: boolean = true;
 
-  constructor(resources: Record<string, Pixi.LoaderResource>, client: GameClient, config: ControlsConfig) {
+  constructor(resources: Record<string, Pixi.ILoaderResource>, client: GameClient, config: ControlsConfig) {
     this.client = client;
     this.resources = resources;
     this.container = new Pixi.Container();

@@ -16,7 +16,7 @@ export interface DebugDisplayConfig {
 }
 
 export class DebugDisplay {
-  private resources: Record<string, Pixi.LoaderResource>;
+  private resources: Record<string, Pixi.ILoaderResource>;
   //viewport: Viewport;
   private TEXT_STYLE = {
     fontFamily: "Arial",
@@ -29,7 +29,7 @@ export class DebugDisplay {
   private renderedItems: Map<string, Pixi.DisplayObject> = new Map();
   private boardScale: number;
 
-  constructor(resources: Record<string, Pixi.LoaderResource>, config: DebugDisplayConfig) {
+  constructor(resources: Record<string, Pixi.ILoaderResource>, config: DebugDisplayConfig) {
     this.resources = resources;
     this.boardScale = config.boardScale;
     this.viewportContainer = new Pixi.Container();

@@ -28,7 +28,7 @@ export class GameBoard {
   container: Pixi.Container;
   gameState: GameState;
   private viewport: Viewport;
-  private resources: Record<string, Pixi.LoaderResource>;
+  private resources: Record<string, Pixi.ILoaderResource>;
   private origin: { x: number, y: number };
   private boardScale: number;
   height: number = 20;
@@ -39,7 +39,7 @@ export class GameBoard {
   private mySpaceshipId: string;
 
   constructor(
-    resources: Record<string, Pixi.LoaderResource>,
+    resources: Record<string, Pixi.ILoaderResource>,
     viewport: Viewport,
     config: GameBoardConfig
   ) {

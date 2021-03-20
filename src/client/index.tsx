@@ -1,3 +1,4 @@
+import "setimmediate";
 import { render } from "react-dom";
 import * as Pixi from "pixi.js";
 import { Viewport } from "pixi-viewport";
@@ -34,7 +35,7 @@ function main() {
     .add("hgradient", makeAssetUrl("hgradient.png"))
     .add("arrows", makeAssetUrl("Arrows-SmallandLarge-1.json"))
     .load((loader, resources) => {
-      const myResources: Record<string, Pixi.LoaderResource> = { };
+      const myResources: Record<string, Pixi.ILoaderResource> = { };
       Object.assign(myResources, resources); // TODO: this might be terrible
 
       const client = new GameClient(pixiApp, loader, myResources);

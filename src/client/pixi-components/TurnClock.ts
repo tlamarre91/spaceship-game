@@ -13,14 +13,14 @@ export interface TurnClockConfig {
 export class TurnClock {
   container: Pixi.Container;
   barSprite: Pixi.Sprite;
-  private resources: Record<string, Pixi.LoaderResource>;
+  private resources: Record<string, Pixi.ILoaderResource>;
   maxTimeMs: number;
   width: number;
   height: number;
   private y: number;
   private startTime: number;
 
-  constructor(resources: Record<string, Pixi.LoaderResource>, config: TurnClockConfig) {
+  constructor(resources: Record<string, Pixi.ILoaderResource>, config: TurnClockConfig) {
     this.maxTimeMs = config.maxTimeMs;
     this.width = window.innerWidth;
     this.height = config.height;
