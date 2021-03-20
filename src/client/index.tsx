@@ -1,10 +1,8 @@
-import React from "react";
 import { render } from "react-dom";
 import * as Pixi from "pixi.js";
 import { Viewport } from "pixi-viewport";
 
 import { ALPHABET } from "~shared/util";
-import { log } from "~shared/log";
 import { makeAssetUrl } from "./assets";
 import { GameClient } from "./GameClient";
 import {

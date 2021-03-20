@@ -12,7 +12,8 @@
     "debug": "node --enable-source-maps --inspect .",
     "test": "jest",
     "docker": "docker build -t tlamarre/spaceship-game .",
-    "build-watch": "gulp watch"
+    "build-watch": "gulp watch",
+    "build-admin": "gulp admin"
   },
   "dependencies": {
     "axios": "^0.19.2",

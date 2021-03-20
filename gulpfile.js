@@ -32,6 +32,10 @@ function cleanClient() {
   return del(path.join(STATIC_DIR, "js", "client.js"));
 }
 
+function cleanAdminClient() {
+  return del(path.join(STATIC_DIR, "js", "admin-client.js"));
+}
+
 function cleanTemplates() {
   return del(path.join(TARGET_DIR, "server", "templates"));
 }
@@ -66,21 +70,29 @@ function buildClient() {
   // TODO: remember to configure build for production!
   // do this by checking NODE_ENV here and picking the right webpack config
   // (set mode: "production" and disable devtool: "inline-source-map")
-  const webpackConfig = require("./webpack.config");
+  const webpackConfig = require("./client-webpack.config");
   return gulp.src(path.join("src", "client", "index.tsx"))
+    .pipe(webpack(webpackConfig, webpackCompiler))
+    .pipe(gulp.dest(path.join(STATIC_DIR, "js")));
+}
+
+function buildAdminClient() {
+  const webpackConfig = require("./admin-client-webpack.config");
+  return gulp.src(path.join("src", "admin-client", "index.tsx")) // is this necessary here or above? webpack config already specifies
     .pipe(webpack(webpackConfig, webpackCompiler))
     .pipe(gulp.dest(path.join(STATIC_DIR, "js")));
 }
 
 exports.server = gulp.series(cleanServer, buildServer);
 exports.client = gulp.series(cleanClient, buildClient);
-//exports.clean = gulp.parallel(cleanClient, cleanServer, cleanTemplates, cleanShaders, cleanAssets);
+exports.admin = gulp.series(cleanAdminClient, buildAdminClient);
 exports.clean = () => { return del(path.join(TARGET_DIR, "*")) };
 
 exports.watch = (cb) => {
   const opts = { ignoreInitial: false };
   gulp.watch(["src/server/**/*", "src/shared/**/*"], opts, exports.server);
   gulp.watch(["src/client/**/*", "src/shared/**/*"], opts, exports.client);
+  gulp.watch(["src/admin/**/*", "src/shared/**/*"], opts, exports.admin);
   gulp.watch(["src/templates/**/*"], opts, gulp.series(cleanTemplates, copyTemplates));
   gulp.watch(["assets/**/*"], opts, gulp.series(cleanAssets, copyAssets));
   gulp.watch(["src/shaders/**/*"], opts, gulp.series(cleanShaders, copyShaders));
