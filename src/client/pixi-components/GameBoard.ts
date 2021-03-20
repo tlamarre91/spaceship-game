@@ -22,7 +22,6 @@ import * as event from "~shared/model/GameEvent";
 export interface GameBoardConfig {
   origin: { x: number, y: number };
   boardScale: number;
-  gameState: GameState;
 }
 
 export class GameBoard {
@@ -44,7 +43,6 @@ export class GameBoard {
     viewport: Viewport,
     config: GameBoardConfig
   ) {
-    this.gameState = config.gameState;
     this.resources = resources;
     this.viewport = viewport;
     this.origin = config.origin;
@@ -94,12 +92,16 @@ export class GameBoard {
     });
   }
 
+  setGameState(gameState: GameState) {
+    this.gameState = gameState;
+  }
+
   refresh() {
     this.renderedEntityContainer.refresh();
   }
 
   snapToEntity(id: string) {
-    const ent = this.gameState.getEntity(id);
+    const ent = this.gameState?.getEntity(id);
     if (ent && hasPosition(ent)) {
       const [x, y] = ent.position.toCartesian(this.boardScale);
       const snapOptions = {
@@ -132,10 +134,12 @@ export class GameBoard {
   }
 
   setListeners() {
-    this.gameState.listeners.onTurnEnd = this.onTurnEnd;
-    this.gameState.listeners.onEntityMoved = this.onEntityMoved;
-    this.gameState.listeners.onEntitySpawned = this.onEntitySpawned;
-    this.gameState.listeners.onEntityRemoved = this.onEntityRemoved;
+    if (this.gameState?.listeners) {
+      this.gameState.listeners.onTurnEnd = this.onTurnEnd;
+      this.gameState.listeners.onEntityMoved = this.onEntityMoved;
+      this.gameState.listeners.onEntitySpawned = this.onEntitySpawned;
+      this.gameState.listeners.onEntityRemoved = this.onEntityRemoved;
+    }
   }
 
   //addEntity(entity: PositionEntity & RotationEntity) {

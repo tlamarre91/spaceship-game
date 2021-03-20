@@ -109,6 +109,7 @@ export class GameClient {
       log.info("initializing headless client");
     }
   }
+
   initializeGameState(entityData: object[]) {
     this.gameState = GameState.fromEntityData(entityData);
     this.gameState.entities.forEach((entity) => {
@@ -118,6 +119,7 @@ export class GameClient {
       }
     });
 
+    this.components?.board.setGameState(this.gameState);
     this.components?.board.setListeners();
     this.components?.board.refresh();
   }
@@ -275,7 +277,6 @@ export class GameClient {
         y: this.viewport.height / 2
       },
       boardScale,
-      gameState: this.gameState
     };
 
     const controlsConfig = {

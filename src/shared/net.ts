@@ -9,6 +9,10 @@ import {
 export class Message {
 }
 
+export class AdminCommand extends Message {
+  static event: string = "admin";
+}
+
 export class Join extends Message {
   static event: string = "j";
   readonly clientId: string;
