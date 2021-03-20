@@ -26,6 +26,6 @@ module.exports = {
     }
   },
   output: {
-    filename: "client.js",
+    filename: "admin-client.js",
   },
 }

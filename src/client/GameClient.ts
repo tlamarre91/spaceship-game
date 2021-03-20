@@ -11,10 +11,14 @@ import {
 
 import {
   GameEntity,
-  HexVector,
-  HEX_DIRECTIONS,
   GameState,
-  PlayerRole
+  HexVector,
+  PositionEntity,
+  RotationEntity,
+  hasPosition,
+  hasRotation,
+  HEX_DIRECTIONS,
+  PlayerRole,
 } from "~shared/model";
 import * as net from "~shared/net";
 import * as debug from "~shared/model/DebugItem";
@@ -48,6 +52,8 @@ export class GameClient {
   //private socket: Socket = {} as Socket;
   private socket: Socket;
 
+  private headless: boolean;
+  private gameState: GameState;
   private loader: Pixi.Loader;
   private resources: Record<string, Pixi.LoaderResource>;
   private viewport: Viewport;
@@ -68,38 +74,56 @@ export class GameClient {
   private sendActionsTimeout: NodeJS.Timeout;
 
   constructor(
-    pixiApp: Pixi.Application,
-    loader: Pixi.Loader,
-    resources: Record<string, Pixi.LoaderResource>
+    pixiApp?: Pixi.Application,
+    loader?: Pixi.Loader,
+    resources?: Record<string, Pixi.LoaderResource>
   ) {
     this.clientId = uuid();
     log.info(`initializing client ${idtrim(this.clientId)}`);
-    this.pixiApp = pixiApp;
-    this.loader = loader;
-    this.resources = resources;
+    if (pixiApp !== undefined && loader !== undefined && resources !== undefined) {
+      this.headless = false;
+      this.pixiApp = pixiApp;
+      this.loader = loader;
+      this.resources = resources;
 
-    this.viewport = new Viewport({
-      screenWidth: window.innerWidth,
-      screenHeight: window.innerHeight,
-      worldWidth: 3000,
-      worldHeight: 3000,
-      interaction: pixiApp.renderer.plugins.interaction
+      this.viewport = new Viewport({
+        screenWidth: window.innerWidth,
+        screenHeight: window.innerHeight,
+        worldWidth: 3000,
+        worldHeight: 3000,
+        interaction: pixiApp.renderer.plugins.interaction
+      });
+
+      this.pixiApp.stage.addChild(this.viewport);
+
+      this.viewport
+        .animate({
+          time: 200
+        })
+        .drag()
+      //.pinch()
+      //.decelerate()
+        .wheel();
+    } else {
+      this.headless = true;
+      log.info("initializing headless client");
+    }
+  }
+  initializeGameState(entityData: object[]) {
+    this.gameState = GameState.fromEntityData(entityData);
+    this.gameState.entities.forEach((entity) => {
+      if (hasPosition(entity) && hasRotation(entity)) {
+        const zIndex = 10;
+        this.components?.board.addEntity(entity, zIndex);
+      }
     });
 
-    this.pixiApp.stage.addChild(this.viewport);
-
-    this.viewport
-      .animate({
-        time: 200
-      })
-      .drag()
-    //.pinch()
-    //.decelerate()
-      .wheel();
+    this.components?.board.setListeners();
+    this.components?.board.refresh();
   }
 
   centerMySpaceship() {
-    this.components.board.snapToEntity(this.mySpaceshipId);
+    this.components?.board.snapToEntity(this.mySpaceshipId);
   }
 
   setFlags(flags: Partial<GameClientFlags>) {
@@ -120,8 +144,8 @@ export class GameClient {
 
   onWindowResize = () => {
     this.pixiApp?.renderer.resize(window.innerWidth, window.innerHeight);
-    this?.components?.controls?.onWindowResize();
-    this?.components?.clock?.onWindowResize();
+    this.components?.controls?.onWindowResize();
+    this.components?.clock?.onWindowResize();
   }
   
   onConnect = () => {
@@ -133,7 +157,7 @@ export class GameClient {
   onPong = () => {
     this.lastPongTime = Date.now();
     this.averagePing = this.lastPongTime - this.lastPingTime;
-    this.components.debugDiaplay.setTextEntry("ping", this.averagePing.toString());
+    this.components?.debugDiaplay.setTextEntry("ping", this.averagePing.toString());
   }
 
   onInitializeGameState = (msg: net.InitializeGameState) => {
@@ -143,12 +167,12 @@ export class GameClient {
     } = msg;
 
     this.mySpaceshipId = yourShipId;
-    this.components.debugDiaplay.setTextEntry("my ship id", idtrim(yourShipId));
-    this.components.board.initializeGameState(entityData);
+    this.components?.debugDiaplay.setTextEntry("my ship id", idtrim(yourShipId));
+    this.initializeGameState(entityData);
   }
 
   onTurnStart = (msg: net.TurnStart) => {
-    this.components.clock.restart();
+    this.components?.clock.restart();
     this.sendActionQueues();
   }
 
@@ -169,18 +193,18 @@ export class GameClient {
     } = msg;
 
     // TODO: ew! sorta spaghetti
-    this?.components?.board?.gameState?.setEventQueue(turnEvents);
-    this?.components?.board?.gameState?.passTurn();
+    this.components?.board?.gameState?.setEventQueue(turnEvents);
+    this.components?.board?.gameState?.passTurn();
   }
 
   sendActionQueues = () => {
-    const controlsOutput = this.components.controls.getOutput();
+    const controlsOutput = this.components?.controls.getOutput();
     let roleActionTuples: [PlayerRole, action.GameAction[]][] = [];
-    if (controlsOutput.acceleration) {
+    if (controlsOutput?.acceleration) {
       const accel = new action.AccelerateSelf(controlsOutput.acceleration);
       roleActionTuples.push(["n", [accel]]);
     }
-    const shootVector = controlsOutput.shooting;
+    const shootVector = controlsOutput?.shooting;
     if (shootVector) {
       const shoot = new action.SpawnProjectile(shootVector);
       roleActionTuples.push(["w", [shoot]]);
@@ -198,7 +222,7 @@ export class GameClient {
 
     this.viewport.addChild(bg);
     if (this.flags.debug) {
-      this.components.debugDiaplay.refresh();
+      this.components?.debugDiaplay.refresh();
     }
   }
 
@@ -207,15 +231,15 @@ export class GameClient {
   tick = () => {
     if (0 == this.frame) {
       const [x, y] = [Math.floor(Math.random() * 25), Math.floor(Math.random() * 25)];
-      this?.components?.board.highlightHex(x, y);
-      this?.components?.board.refresh();
+      this.components?.board.highlightHex(x, y);
+      this.components?.board.refresh();
     }
 
-    this.components.clock.refresh();
+    this.components?.clock.refresh();
 
     this.frame = (this.frame + 1) % 60;
     if (0 == this.frame) {
-      this.components.debugDiaplay.refresh();
+      this.components?.debugDiaplay.refresh();
     }
 
     //const arrows: debug.DebugItem[] = [];
@@ -238,7 +262,7 @@ export class GameClient {
       //}));
     });
 
-    //this.components.debugDiaplay.setItem("arrows", new debug.CompositeItem({
+    //this.components?.debugDiaplay.setItem("arrows", new debug.CompositeItem({
     //  components: arrows
     //}));
   }
@@ -250,7 +274,8 @@ export class GameClient {
         x: this.viewport.width / 2,
         y: this.viewport.height / 2
       },
-      boardScale
+      boardScale,
+      gameState: this.gameState
     };
 
     const controlsConfig = {
@@ -296,11 +321,12 @@ export class GameClient {
   }
 
   start() {
-    this.setupComponents();
     this.setupSocket();
-    this.pixiApp.ticker.add(this.tick);
-    //setInterval(this.sendPing, 1000);
-    this.testDebug();
+    if (!this.headless) {
+      this.setupComponents();
+      this.pixiApp.ticker.add(this.tick);
+      this.testDebug();
+    }
   }
 
   testDebug() {
@@ -331,6 +357,6 @@ export class GameClient {
       zIndex: 10,
     });
 
-    this.components.debugDiaplay.setItem("coordinates", compItem);
+    this.components?.debugDiaplay.setItem("coordinates", compItem);
   }
 }

@@ -29,5 +29,9 @@ app.get("/", async (req, res) => {
   res.render("base");
 });
 
+app.get("/admin", async (req, res) => {
+  res.render("admin");
+});
+
 const gameServer = new GameServer(httpServer);
 gameServer.start();

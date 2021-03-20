@@ -92,7 +92,7 @@ exports.watch = (cb) => {
   const opts = { ignoreInitial: false };
   gulp.watch(["src/server/**/*", "src/shared/**/*"], opts, exports.server);
   gulp.watch(["src/client/**/*", "src/shared/**/*"], opts, exports.client);
-  gulp.watch(["src/admin/**/*", "src/shared/**/*"], opts, exports.admin);
+  gulp.watch(["src/client/**/*", "src/admin-client/**/*", "src/shared/**/*"], opts, exports.admin);
   gulp.watch(["src/templates/**/*"], opts, gulp.series(cleanTemplates, copyTemplates));
   gulp.watch(["assets/**/*"], opts, gulp.series(cleanAssets, copyAssets));
   gulp.watch(["src/shaders/**/*"], opts, gulp.series(cleanShaders, copyShaders));

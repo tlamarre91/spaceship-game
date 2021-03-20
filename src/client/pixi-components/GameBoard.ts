@@ -22,6 +22,7 @@ import * as event from "~shared/model/GameEvent";
 export interface GameBoardConfig {
   origin: { x: number, y: number };
   boardScale: number;
+  gameState: GameState;
 }
 
 export class GameBoard {
@@ -43,6 +44,7 @@ export class GameBoard {
     viewport: Viewport,
     config: GameBoardConfig
   ) {
+    this.gameState = config.gameState;
     this.resources = resources;
     this.viewport = viewport;
     this.origin = config.origin;
@@ -73,8 +75,6 @@ export class GameBoard {
 
     this.container = new Pixi.Container();
     this.container.sortableChildren = true;
-    //this.container.x = -500;
-    //this.container.y = -300;
     this.container.addChild(this.renderedEntityContainer.container);
 
     this.tileSprites = tiles.map((tile) => {
@@ -131,28 +131,35 @@ export class GameBoard {
     this.renderedEntityContainer.removeEntityById(entity.id);
   }
 
+  setListeners() {
+    this.gameState.listeners.onTurnEnd = this.onTurnEnd;
+    this.gameState.listeners.onEntityMoved = this.onEntityMoved;
+    this.gameState.listeners.onEntitySpawned = this.onEntitySpawned;
+    this.gameState.listeners.onEntityRemoved = this.onEntityRemoved;
+  }
+
   //addEntity(entity: PositionEntity & RotationEntity) {
   //  this.gameState.addEntity(entity);
   //  this.renderedEntityContainer.addEntity(entity);
   //}
 
-  initializeGameState(entityData: object[]) {
-    this.renderedEntityContainer.removeAll();
-    this.gameState = GameState.fromEntityData(entityData);
-    this.gameState.entities.forEach((entity) => {
-      if (hasPosition(entity) && hasRotation(entity)) {
-        const zIndex = 10;
-        this.renderedEntityContainer.addEntity(entity, zIndex);
-      }
-    });
+  // initializeGameState(entityData: object[]) {
+  //   this.renderedEntityContainer.removeAll();
+  //   this.gameState = GameState.fromEntityData(entityData);
+  //   this.gameState.entities.forEach((entity) => {
+  //     if (hasPosition(entity) && hasRotation(entity)) {
+  //       const zIndex = 10;
+  //       this.renderedEntityContainer.addEntity(entity, zIndex);
+  //     }
+  //   });
 
-    this.gameState.listeners.onTurnEnd = this.onTurnEnd;
-    this.gameState.listeners.onEntityMoved = this.onEntityMoved;
-    this.gameState.listeners.onEntitySpawned = this.onEntitySpawned;
-    this.gameState.listeners.onEntityRemoved = this.onEntityRemoved;
+  //   this.gameState.listeners.onTurnEnd = this.onTurnEnd;
+  //   this.gameState.listeners.onEntityMoved = this.onEntityMoved;
+  //   this.gameState.listeners.onEntitySpawned = this.onEntitySpawned;
+  //   this.gameState.listeners.onEntityRemoved = this.onEntityRemoved;
 
-    this.renderedEntityContainer.refresh();
-  }
+  //   this.renderedEntityContainer.refresh();
+  // }
 
   highlightHex(x: number, y: number) {
     this.tileSprites.forEach((sprite, index) => {
@@ -172,5 +179,9 @@ export class GameBoard {
     //    }
     //  });
     //});
+  }
+
+  addEntity(entity: PositionEntity & RotationEntity, zIndex: number) {
+    this.renderedEntityContainer.addEntity(entity, zIndex);
   }
 }
