@@ -239,6 +239,13 @@ export class GameServer {
     }
   }
 
+  onAdminCommand = (msg: net.AdminCommand) => {
+    const { clientId, command } = msg;
+    if (command == net.Command.DumpState) {
+      const response = new net.DumpState
+    }
+  }
+
   onJoin = (msg: net.Join) => {
     const {
       clientId,

@@ -5,10 +5,13 @@ import {
   appendRandom
 } from "../redux/reducers";
 import Layout from "./Layout";
+// import makeLogger from "~shared/log";
 import { log } from "~shared/log";
 import { idtrim } from "~shared/util";
 import * as net from "~shared/net";
 import { GameClient } from "~client/GameClient";
+
+// const log = makeLogger(__filename);
 
 export interface ClientState {
   clientId: string;
@@ -28,7 +31,7 @@ export const AdminInterface: React.FC<AdminInterfaceProps> = (props) => {
       clients.push(client);
       client.start();
       client.addEventHandler(net.TurnEnd.event, (msg: net.TurnEnd) => {
-        console.log(idtrim(client.clientId), msg.turnEvents);
+        log.info(idtrim(client.clientId));
       });
     }
     setClients(clients);

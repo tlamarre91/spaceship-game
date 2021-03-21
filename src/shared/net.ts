@@ -9,12 +9,45 @@ import {
 export class Message {
 }
 
+export enum EventString {
+  Join = "j",
+  JoinResponse = "jr",
+  Quit = "q",
+  InitializeGameState = "s",
+  UpdateGameState = "us",
+  AddPlayer = "ap",
+  RemovePlayer = "rp",
+  ServerInfo = "f",
+  GamePing = "gp",
+  GamePong = "go",
+  SetActionQueue = "sa",
+  SetMultipleActionQueues = "sma",
+  PushAction = "pa",
+  TurnWarn = "tw",
+  TurnEnd = "te",
+  TurnStart = "ts",
+}
+
+export enum Command {
+  DumpState = "d"
+}
+
 export class AdminCommand extends Message {
   static event: string = "admin";
+  readonly clientId: string;
+  readonly command: Command;
+  constructor(clientId: string, command: Command) {
+    super();
+    this.clientId = clientId;
+    this.command = command;
+  }
+}
+
+export class DumpState extends Message {
 }
 
 export class Join extends Message {
-  static event: string = "j";
+  static event = EventString.Join;
   readonly clientId: string;
 
   constructor(clientId: string) {
@@ -24,7 +57,7 @@ export class Join extends Message {
 }
 
 export class JoinResponse extends Message {
-  static readonly event: string = "jr";
+  static readonly event = EventString.JoinResponse;
   readonly initialPosition: [number, number];
 
   constructor(initialPosition: [number, number]) {
@@ -34,7 +67,7 @@ export class JoinResponse extends Message {
 }
 
 export class Quit extends Message {
-  static readonly event: string = "q";
+  static readonly event = EventString.Quit;
   //readonly clientId: string;
   readonly name: string;
 
@@ -46,7 +79,7 @@ export class Quit extends Message {
 }
 
 export class InitializeGameState extends Message {
-  static readonly event: string = "s";
+  static readonly event = EventString.InitializeGameState;
   readonly entityData: object[];
   readonly yourShipId: string;
   constructor(yourShipId: string, entities: GameEntity[]) {
@@ -57,7 +90,7 @@ export class InitializeGameState extends Message {
 }
 
 export class UpdateGameState extends Message {
-  static readonly event: string = "us";
+  static readonly event = EventString.UpdateGameState;
   readonly entityData: object[];
   constructor(entities: GameEntity[]) {
     super();
@@ -66,28 +99,28 @@ export class UpdateGameState extends Message {
 }
 
 export class AddPlayer extends Message {
-  static readonly event: string = "ap";
+  static readonly event = EventString.AddPlayer;
 }
 
 export class RemovePlayer extends Message {
-  static readonly event: string = "rp";
+  static readonly event = EventString.RemovePlayer;
   readonly playerId: string;
 }
 
 export class ServerInfo extends Message {
-  static readonly event: string = "f";
+  static readonly event = EventString.ServerInfo;
 }
 
 export class GamePing extends Message {
-  static readonly event: string = "gp";
+  static readonly event = EventString.GamePing;
 }
 
 export class GamePong extends Message {
-  static readonly event: string = "go";
+  static readonly event = EventString.GamePong;
 }
 
 export class SetActionQueue extends Message {
-  static readonly event: string = "sa";
+  static readonly event = EventString.SetActionQueue;
   //readonly clientId: string;
   readonly role: PlayerRole;
   readonly actions: GameAction[];
@@ -100,7 +133,7 @@ export class SetActionQueue extends Message {
 }
 
 export class SetMultipleActionQueues extends Message {
-  static readonly event: string = "sma";
+  static readonly event = EventString.SetMultipleActionQueues;
 
   readonly roleActionTuples: [PlayerRole, GameAction[]][];
   constructor(roleActionTuples: [PlayerRole, GameAction[]][]) {
@@ -114,7 +147,7 @@ export class SetMultipleActionQueues extends Message {
 }
 
 export class PushAction extends Message {
-  static readonly event: string = "pa";
+  static readonly event = EventString.PushAction;
   //readonly clientId: string;
   readonly role: PlayerRole;
   readonly action: GameAction;
@@ -127,7 +160,7 @@ export class PushAction extends Message {
 }
 
 export class TurnWarn extends Message {
-  static readonly event: string = "tw";
+  static readonly event = EventString.TurnWarn;
   readonly msRemaining: number;
   constructor(msRemaining: number) {
     super();
@@ -136,7 +169,7 @@ export class TurnWarn extends Message {
 }
 
 export class TurnEnd extends Message {
-  static readonly event: string = "te";
+  static readonly event = EventString.TurnEnd;
   /**
    * turnEvents: all events that occurred this turn
    */
@@ -155,7 +188,7 @@ export class TurnEnd extends Message {
 }
 
 export class TurnStart extends Message {
-  static readonly event: string = "ts";
+  static readonly event = EventString.TurnStart;
   readonly msRemaining: number;
   constructor(msRemaining: number) {
     super();

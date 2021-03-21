@@ -69,6 +69,7 @@
   "_moduleAliases": {
     "~shared": "dist/shared",
     "~server": "dist/server",
-    "~client": "dist/client"
+    "~client": "dist/client",
+    "~admin": "dist/admin"
   }
 }

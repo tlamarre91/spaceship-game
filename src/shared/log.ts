@@ -24,9 +24,9 @@ if (typeof window !== 'undefined') {
     ];
 
     if (process.env.NODE_ENV !== 'production') {
-        transports.push(
-            new winston.transports.Console({ format: winston.format.simple() }),
-        );
+      transports.push(
+        new winston.transports.Console({ format: winston.format.simple() }),
+      )
     }
 
     loggerOpts = {
@@ -37,3 +37,16 @@ if (typeof window !== 'undefined') {
 }
 
 export const log: winston.Logger = winston.createLogger(loggerOpts);
+export default function(callingModuleFile: string): winston.Logger {
+  const parts = callingModuleFile.split("/");
+  const label = `${parts[parts.length - 2]}/${parts[parts.length - 1]}`;
+  const logger = winston.createLogger({
+    format: winston.format.combine(
+      winston.format.label({ label }),
+      winston.format.timestamp(),
+      winston.format.prettyPrint()
+    ),
+    transports: [new winston.transports.Console()]
+  });
+  return logger;
+}
