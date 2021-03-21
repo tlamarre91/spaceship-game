@@ -28,6 +28,6 @@ export const stateSlice = createSlice({
 
 export const { append, clear, appendRandom } = stateSlice.actions;
 
-export const selectValue = (state: RootState) => state.testKey; // ?????? no types?
+export const selectValue = (state: RootState) => state.stateReducer.testKey; // ?????? no types?
 
 export default stateSlice.reducer;

@@ -80,6 +80,7 @@ export class GameClient {
   ) {
     this.clientId = uuid();
     log.info(`initializing client ${idtrim(this.clientId)}`);
+    console.log(`initializing client ${idtrim(this.clientId)}`);
     if (pixiApp !== undefined && loader !== undefined && resources !== undefined) {
       this.headless = false;
       this.pixiApp = pixiApp;

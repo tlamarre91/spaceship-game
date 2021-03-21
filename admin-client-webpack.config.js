@@ -1,5 +1,6 @@
 const path = require("path");
 const dotenv = require("dotenv");
+const webpack = require("webpack");
 dotenv.config();
 module.exports = {
   mode: process.env.NODE_ENV,
@@ -17,15 +18,24 @@ module.exports = {
       }
     ]
   },
+  plugins: [
+    new webpack.ProvidePlugin({
+      process: "process/browser"
+    }),
+    new webpack.ProvidePlugin({
+      Buffer: ["buffer", "Buffer"]
+    }),
+  ],
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".jsx"],
     fallback: {
-      os: false,
+      os: require.resolve("os-browserify/browser"),
       fs: false,
-      path: false,
-      zlib: false,
-      http: false,
-      https: false
+      stream: require.resolve("stream-browserify"),
+      path: require.resolve("path-browserify"),
+      zlib: require.resolve("browserify-zlib"),
+      http: require.resolve("stream-http"),
+      https: require.resolve("https-browserify"),
     },
     alias: {
       "~shared": path.resolve("src/shared"),

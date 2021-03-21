@@ -21,18 +21,18 @@ export const AdminInterface: React.FC<AdminInterfaceProps> = (props) => {
   const [clients, setClients] = React.useState<GameClient[]>([]);
   const testValue = useSelector(selectValue);
   const dispatch = useDispatch();
-  //React.useEffect(() => {
-  //  const clients: GameClient[] = [];
-  //  for (let i = 0; i < 16; i += 1) {
-  //    const client = new GameClient()
-  //    clients.push(client);
-  //    client.start();
-  //    client.addEventHandler(net.TurnEnd.event, (msg: net.TurnEnd) => {
-  //      console.log(idtrim(client.clientId), msg.turnEvents);
-  //    });
-  //  }
-  //  setClients(clients);
-  //}, []);
+  React.useEffect(() => {
+    const clients: GameClient[] = [];
+    for (let i = 0; i < 16; i += 1) {
+      const client = new GameClient()
+      clients.push(client);
+      client.start();
+      client.addEventHandler(net.TurnEnd.event, (msg: net.TurnEnd) => {
+        console.log(idtrim(client.clientId), msg.turnEvents);
+      });
+    }
+    setClients(clients);
+  }, []);
   return (
     <Layout>
       {clients.map((client) => (
