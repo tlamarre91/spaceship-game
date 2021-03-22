@@ -129,8 +129,8 @@ export class GameBoard {
     }
   }
 
-  onEntityRemoved = (entity: GameEntity) => {
-    this.renderedEntityContainer.removeEntityById(entity.id);
+  onEntityRemoved = (entityId: string) => {
+    this.renderedEntityContainer.removeEntityById(entityId);
   }
 
   setListeners() {

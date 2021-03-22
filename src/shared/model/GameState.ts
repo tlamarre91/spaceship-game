@@ -44,7 +44,7 @@ export interface GameStateConfig {
 
 export interface GameStateListeners {
   onEntitySpawned?: (entity: GameEntity) => void;
-  onEntityRemoved?: (entity: GameEntity) => void;
+  onEntityRemoved?: (entityId: string) => void;
   onEntityMoved?: (entity: GameEntity) => void;
   onTurnEnd?: (events?: event.GameEvent[]) => void;
 }
@@ -177,13 +177,13 @@ export class GameState {
   }
 
   removeEntityId(entityId: string): GameEntity | null {
-    if (! entityId) {
-      log.warn(`tried removing entity with id ${entityId}`);
+    if (!entityId) {
+      log.warn(`tried removing entity with id ${entityId ?? "empty"}`);
       return null;
     }
 
     const entity = this.entitiesById.get(entityId);
-    if (! entity) {
+    if (!entity) {
       log.warn(`removeEntityId: could not find entity with id ${idtrim(entityId)}`);
     } else {
       this.entitiesById.delete(entityId);
@@ -193,6 +193,15 @@ export class GameState {
         this.actionQueueManager.removeSpaceship(entityId);
         if (clientIds) {
           clientIds.forEach(id => this.clientIdSpaceships.delete(id));
+        }
+
+        if (this.canonical) {
+          try {
+            const ev = new event.EntityRemoved(entityId);
+            this.eventQueue.push(ev);
+          } catch (err) {
+            log.error(`removeEntityId: ${err}`);
+          }
         }
 
         return entity;
@@ -310,6 +319,8 @@ export class GameState {
         } else if (event.isSpaceshipJoined(ev)) {
           // TODO: wait... is this different from EntitySpawned?
           log.error(`processEvent not yet implemented for type ${ev.eventType}`);
+        } else if (event.isEntityRemoved(ev)) {
+          this.processEntityRemoved(ev);
         } else {
           // TODO: implement the rest!
           log.error(`processEvent not yet implemented for type ${ev.eventType}`);
@@ -357,7 +368,8 @@ export class GameState {
     }
 
     if (this.entitiesById.get(entity.id)) {
-      /** TODO: more graceful handling of this situation, which currently is
+      /**
+       * TODO: more graceful handling of this situation, which currently is
        * known to happen on game join: the initial state includes the player's
        * new ship, which is also included in the turn's events as an
        * EntitySpawned
@@ -376,12 +388,18 @@ export class GameState {
 
     this.listeners?.onEntitySpawned?.(entity);
   }
+  
+  private processEntityRemoved(gameEvent: event.EntityRemoved) {
+    const { entityId } = gameEvent;
+    this.removeEntityId(entityId);
+    this.listeners?.onEntityRemoved?.(entityId);
+  }
 
   private simulate(deltaTime: number = 1) {
     this.entities.forEach((e) => {
       if (hasVelocity(e) && hasPosition(e)) {
         const deltaP: HexVector = deltaTime == 1 ? e.velocity : e.velocity.times(deltaTime);
-        if (! deltaP.equals(HexVector.ZERO)) {
+        if (!deltaP.equals(HexVector.ZERO)) {
           // TODO: do we really want things that moved less than one unit to be considered "moved"?
           e.setPosition(e.position.plus(deltaP));
           e.movedThisTurn = true;

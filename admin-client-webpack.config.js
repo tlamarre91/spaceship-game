@@ -44,6 +44,8 @@ module.exports = {
     }
   },
   output: {
+    // TODO: this is the only difference between client and admin-client, so
+    // just make this a parameter.
     filename: "admin-client.js",
   },
 }

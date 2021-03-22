@@ -37,6 +37,10 @@ if (typeof window !== 'undefined') {
 }
 
 export const log: winston.Logger = winston.createLogger(loggerOpts);
+
+/**
+ * Make a new logger, using the calling filename as label.
+ */
 export default function(callingModuleFile: string): winston.Logger {
   const parts = callingModuleFile.split("/");
   const label = `${parts[parts.length - 2]}/${parts[parts.length - 1]}`;

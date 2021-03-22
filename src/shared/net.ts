@@ -1,3 +1,6 @@
+/**
+ * Definitions for messages passed between client and server.
+ */
 import {
   HexVector,
   GameEntity,
@@ -9,23 +12,29 @@ import {
 export class Message {
 }
 
+// I could imagine making "event" just a very general category, and within a
+// category, the Messages differentiate themselves. As opposed to having a
+// million different event strings, and a million different dispatch functions.
+// I could compartmentalize the dispatch system a little more, perhaps.
 export enum EventString {
-  Join = "j",
-  JoinResponse = "jr",
-  Quit = "q",
-  InitializeGameState = "s",
-  UpdateGameState = "us",
   AddPlayer = "ap",
-  RemovePlayer = "rp",
-  ServerInfo = "f",
+  Admin = "admin",
+  DumpState = "dump",
   GamePing = "gp",
   GamePong = "go",
+  InitializeGameState = "s",
+  Join = "j",
+  JoinResponse = "jr",
+  PushAction = "pa",
+  Quit = "q",
+  RemovePlayer = "rp",
+  ServerInfo = "f",
   SetActionQueue = "sa",
   SetMultipleActionQueues = "sma",
-  PushAction = "pa",
-  TurnWarn = "tw",
   TurnEnd = "te",
   TurnStart = "ts",
+  TurnWarn = "tw",
+  UpdateGameState = "us",
 }
 
 export enum Command {
@@ -33,7 +42,7 @@ export enum Command {
 }
 
 export class AdminCommand extends Message {
-  static event: string = "admin";
+  static event = EventString.Admin;
   readonly clientId: string;
   readonly command: Command;
   constructor(clientId: string, command: Command) {
@@ -44,6 +53,7 @@ export class AdminCommand extends Message {
 }
 
 export class DumpState extends Message {
+  static event = EventString.DumpState;
 }
 
 export class Join extends Message {

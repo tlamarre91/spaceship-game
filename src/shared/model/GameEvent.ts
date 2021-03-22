@@ -21,7 +21,8 @@ export enum EventType {
   SpaceshipDestroyed = "sd",
   SpaceshipDamaged = "sm",
   EntityMoved = "em",
-  EntitySpawned = "es"
+  EntitySpawned = "es",
+  EntityRemoved = "er",
 }
 
 /**
@@ -90,4 +91,13 @@ export class EntitySpawned implements GameEvent {
 
 export function isEntitySpawned(ev: GameEvent): ev is EntitySpawned {
   return ev.eventType == EventType.EntitySpawned;
+}
+
+export class EntityRemoved implements GameEvent {
+  readonly eventType = EventType.EntityRemoved;
+  constructor(readonly entityId: string) { }
+}
+
+export function isEntityRemoved(ev: GameEvent) : ev is EntityRemoved {
+  return ev.eventType == EventType.EntityRemoved;
 }
